@@ -395,6 +395,8 @@ fn run_verify(args: VerifyArgs) -> Result<()> {
             println!("    Calculated Raw Hash : \x1b[1;31m{}\x1b[0m", record.calculated_raw_hash);
             println!("    Forensic Reason     : {:?}", record.reason);
         }
+
+        println!("\n  \x1b[1;33m[Forensic Verdict]\x1b[0m Parquet block integrity is broken. The tamper-evident proof prevents fabricated evidence from being accepted.\x1b[0m");
     }
 
     Ok(())
