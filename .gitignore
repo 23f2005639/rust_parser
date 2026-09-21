@@ -1,0 +1,8 @@
+/target
+/data/parquet/*.parquet
+/data/ledger.jsonl
+/data/parsers/*.json
+/data/parsers/*.yaml
+*.log
+!sample_new_firewall.log
+!data/raw/*

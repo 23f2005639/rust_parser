@@ -1,0 +1,5 @@
+RT_FLOW: RT_FLOW_SESSION_CREATE: session created 192.168.10.55/49152->10.0.0.1/443 None None 6 sample-policy trust untrust 12345 N/A(N/A) ge-0/0/0.0
+RT_FLOW: RT_FLOW_SESSION_CLOSE: session closed TCP FIN: 192.168.10.55/49152->10.0.0.1/443 None None 6 sample-policy trust untrust 12345 540(3200) 12(8) 15 UNKNOWN N/A(N/A) ge-0/0/0.0
+RT_FLOW: RT_FLOW_SESSION_DENY: session denied 192.168.20.100/53211->172.16.0.5/22 None None 6 block-ssh untrust dmz 12346 N/A(N/A) ge-0/0/1.0
+RT_FLOW: RT_FLOW_SESSION_CREATE: session created 10.200.1.4/51234->198.51.100.25/80 None None 6 web-out trust untrust 12347 N/A(N/A) ge-0/0/0.0
+RT_FLOW: RT_FLOW_SESSION_DENY: session denied 203.0.113.88/61234->10.0.0.80/8080 None None 6 drop-external untrust dmz 12348 N/A(N/A) ge-0/0/2.0

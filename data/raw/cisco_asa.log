@@ -1,0 +1,260 @@
+<166>Sep 21 14:00:01 asa-core-fw %ASA-6-302013: Built outbound TCP connection 1000672 for outside:203.0.113.54/25 (203.0.113.54/25) to inside:10.1.6.180/52369 (198.51.100.209/52369)
+<166>Sep 21 14:00:02 asa-core-fw %ASA-6-302014: Teardown TCP connection 1000780 for outside:203.0.113.163/3306 to inside:10.1.9.41/27459 duration 0:27:58 bytes 3350664 Reset-I
+<166>Sep 21 14:00:04 asa-core-fw %ASA-6-302015: Built inbound UDP connection 1000556 for outside:198.51.100.18/5060 (198.51.100.18/5060) to inside:10.1.6.180/59770 (198.51.100.207/59770)
+<166>Sep 21 14:00:06 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1000662 for outside:198.51.100.91/4500 to inside:10.1.8.37/35249 duration 0:00:17 bytes 2123
+<164>Sep 21 14:00:08 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.163/59449 dst inside:10.1.18.77/3389 by access-group "dmz_inbound_acl" [0x7f4cc69a, 0x0]
+<162>Sep 21 14:00:10 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.143/27501 to 10.1.9.208/110 flags RST on interface outside
+<164>Sep 21 14:00:12 asa-dc-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = agarcia, IP = 203.0.113.163, Session disconnected. Session Type: SSL, Duration: 0h:39m:20s, Bytes xmt: 32799774, Bytes rcv: 663531, Reason: User Requested
+<166>Sep 21 14:00:15 asa-dc-01 %ASA-6-302013: Built outbound TCP connection 1000365 for outside:198.51.100.26/443 (198.51.100.26/443) to inside:10.1.9.64/47422 (198.51.100.205/47422)
+<166>Sep 21 14:00:16 asa-core-fw %ASA-6-302014: Teardown TCP connection 1000268 for outside:203.0.113.175/22 to inside:10.1.4.93/46271 duration 0:33:56 bytes 3549788 SYN Timeout
+<166>Sep 21 14:00:20 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1000884 for outside:203.0.113.54/4500 (203.0.113.54/4500) to inside:10.1.20.8/54259 (198.51.100.223/54259)
+<166>Sep 21 14:00:21 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1000424 for outside:198.51.100.181/4500 to inside:10.1.3.57/32396 duration 0:00:18 bytes 1949
+<164>Sep 21 14:00:22 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.119/14098 dst inside:10.1.12.156/53 by access-group "dmz_inbound_acl" [0x2223b513, 0x0]
+<162>Sep 21 14:00:26 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 203.0.113.166/24280 to 10.1.4.93/110 flags RST on interface outside
+<164>Sep 21 14:00:28 asa-vpn-gw01 %ASA-4-113019: Group = AnyConnect-VPN, Username = jsmith, IP = 203.0.113.70, Session disconnected. Session Type: SSL, Duration: 3h:23m:27s, Bytes xmt: 27598606, Bytes rcv: 15680747, Reason: User Requested
+<166>Sep 21 14:00:30 asa-edge-01 %ASA-6-302013: Built inbound TCP connection 1000301 for outside:203.0.113.143/5060 (203.0.113.143/5060) to inside:10.1.8.116/32476 (198.51.100.206/32476)
+<166>Sep 21 14:00:30 asa-core-fw %ASA-6-302014: Teardown TCP connection 1000805 for outside:198.51.100.59/22 to inside:10.1.1.196/37888 duration 0:29:16 bytes 632624 Reset-O
+<166>Sep 21 14:00:34 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1000324 for outside:203.0.113.163/123 (203.0.113.163/123) to inside:10.1.3.99/65029 (198.51.100.205/65029)
+<166>Sep 21 14:00:35 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1000782 for outside:203.0.113.54/500 to inside:10.1.2.9/14082 duration 0:00:01 bytes 8135
+<164>Sep 21 14:00:37 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:203.0.113.164/58114 dst inside:10.1.19.73/5060 by access-group "outside_access_in" [0x409d258c, 0x0]
+<162>Sep 21 14:00:39 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 203.0.113.187/58457 to 10.1.9.64/110 flags ACK on interface outside
+<164>Sep 21 14:00:40 asa-edge-01 %ASA-4-113019: Group = AnyConnect-VPN, Username = mkowalski, IP = 198.51.100.21, Session disconnected. Session Type: SSL, Duration: 0h:39m:04s, Bytes xmt: 45322747, Bytes rcv: 28927853, Reason: Idle Timeout
+<166>Sep 21 14:00:43 asa-edge-01 %ASA-6-302013: Built inbound TCP connection 1001322 for outside:203.0.113.137/993 (203.0.113.137/993) to inside:10.1.18.77/26375 (198.51.100.238/26375)
+<166>Sep 21 14:00:46 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1000804 for outside:203.0.113.187/110 to inside:10.1.4.93/47282 duration 0:59:17 bytes 1713700 Connection timeout
+<166>Sep 21 14:00:48 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1000636 for outside:203.0.113.54/161 (203.0.113.54/161) to inside:10.1.8.131/18817 (198.51.100.219/18817)
+<166>Sep 21 14:00:48 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1000878 for outside:203.0.113.137/161 to inside:10.1.11.28/16792 duration 0:00:07 bytes 4208
+<164>Sep 21 14:00:50 asa-dc-01 %ASA-4-106023: Deny udp src outside:198.51.100.26/34457 dst inside:10.1.8.37/3389 by access-group "perimeter_filter" [0xc41b3143, 0x0]
+<162>Sep 21 14:00:53 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.44/29860 to 10.1.4.238/1433 flags SYN+ACK on interface outside
+<164>Sep 21 14:00:55 asa-edge-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = agarcia, IP = 203.0.113.177, Session disconnected. Session Type: SSL, Duration: 2h:14m:43s, Bytes xmt: 42572988, Bytes rcv: 28629005, Reason: Session Timeout
+<166>Sep 21 14:00:58 asa-vpn-gw01 %ASA-6-302013: Built outbound TCP connection 1000734 for outside:198.51.100.50/1433 (198.51.100.50/1433) to inside:10.1.18.77/16288 (198.51.100.227/16288)
+<166>Sep 21 14:00:58 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1000835 for outside:198.51.100.59/3389 to inside:10.1.2.188/51993 duration 0:47:29 bytes 3587947 Idle Timeout
+<166>Sep 21 14:01:00 asa-edge-01 %ASA-6-302015: Built outbound UDP connection 1000588 for outside:203.0.113.164/4500 (203.0.113.164/4500) to inside:10.1.18.77/20008 (198.51.100.202/20008)
+<166>Sep 21 14:01:04 asa-core-fw %ASA-6-302016: Teardown UDP connection 1000968 for outside:198.51.100.148/123 to inside:10.1.18.24/30442 duration 0:00:29 bytes 2995
+<164>Sep 21 14:01:06 asa-core-fw %ASA-4-106023: Deny tcp src outside:198.51.100.42/61365 dst inside:10.1.4.175/110 by access-group "outside_access_in" [0xed56cc94, 0x0]
+<162>Sep 21 14:01:06 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 198.51.100.93/21994 to 10.1.19.73/3306 flags FIN on interface outside
+<164>Sep 21 14:01:10 asa-core-fw %ASA-4-113019: Group = DefaultRAGroup, Username = alewis, IP = 198.51.100.222, Session disconnected. Session Type: SSL, Duration: 1h:53m:58s, Bytes xmt: 30900427, Bytes rcv: 11742589, Reason: Session Timeout
+<166>Sep 21 14:01:10 asa-core-fw %ASA-6-302013: Built inbound TCP connection 1000620 for outside:198.51.100.219/8080 (198.51.100.219/8080) to inside:10.1.4.93/36353 (198.51.100.217/36353)
+<166>Sep 21 14:01:13 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1001269 for outside:203.0.113.54/123 to inside:10.1.14.89/54772 duration 0:21:02 bytes 967806 Reset-I
+<166>Sep 21 14:01:14 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1000669 for outside:203.0.113.63/4500 (203.0.113.63/4500) to inside:10.1.4.175/38719 (198.51.100.220/38719)
+<166>Sep 21 14:01:18 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1001041 for outside:203.0.113.137/53 to inside:10.1.18.77/22697 duration 0:00:23 bytes 3636
+<164>Sep 21 14:01:20 asa-core-fw %ASA-4-106023: Deny udp src outside:198.51.100.181/53771 dst inside:10.1.19.73/8080 by access-group "perimeter_filter" [0xe9178793, 0x0]
+<162>Sep 21 14:01:20 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.70/37004 to 10.1.20.8/8080 flags ACK on interface outside
+<164>Sep 21 14:01:24 asa-core-fw %ASA-4-113019: Group = Contractors-VPN, Username = mkowalski, IP = 203.0.113.54, Session disconnected. Session Type: SSL, Duration: 0h:20m:18s, Bytes xmt: 14115121, Bytes rcv: 14434652, Reason: Administrator Reset
+<166>Sep 21 14:01:26 asa-dc-01 %ASA-6-302013: Built outbound TCP connection 1001191 for outside:203.0.113.180/53 (203.0.113.180/53) to inside:10.1.1.196/54517 (198.51.100.232/54517)
+<166>Sep 21 14:01:28 asa-core-fw %ASA-6-302014: Teardown TCP connection 1001406 for outside:198.51.100.117/1433 to inside:10.1.8.37/44020 duration 0:39:22 bytes 783638 Flow Closed by Inspection
+<166>Sep 21 14:01:28 asa-dc-01 %ASA-6-302015: Built inbound UDP connection 1000979 for outside:198.51.100.219/500 (198.51.100.219/500) to inside:10.1.15.139/19896 (198.51.100.202/19896)
+<166>Sep 21 14:01:32 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1001232 for outside:203.0.113.119/123 to inside:10.1.19.73/47967 duration 0:00:16 bytes 3337
+<164>Sep 21 14:01:32 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.84/17225 dst inside:10.1.2.188/5060 by access-group "outside_access_in" [0xddda24ba, 0x0]
+<162>Sep 21 14:01:36 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.26/18193 to 10.1.9.41/25 flags FIN on interface outside
+<164>Sep 21 14:01:38 asa-dc-01 %ASA-4-113019: Group = DefaultRAGroup, Username = bwilson, IP = 198.51.100.75, Session disconnected. Session Type: SSL, Duration: 3h:29m:16s, Bytes xmt: 16601977, Bytes rcv: 28191122, Reason: Session Timeout
+<166>Sep 21 14:01:40 asa-vpn-gw01 %ASA-6-302013: Built inbound TCP connection 1001475 for outside:198.51.100.72/443 (198.51.100.72/443) to inside:10.1.3.57/39067 (198.51.100.218/39067)
+<166>Sep 21 14:01:41 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1001178 for outside:203.0.113.163/22 to inside:10.1.18.77/15520 duration 0:14:25 bytes 1282073 Connection timeout
+<166>Sep 21 14:01:42 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1001292 for outside:198.51.100.94/123 (198.51.100.94/123) to inside:10.1.19.73/45800 (198.51.100.226/45800)
+<166>Sep 21 14:01:45 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1001811 for outside:203.0.113.187/53 to inside:10.1.2.188/55821 duration 0:00:13 bytes 3971
+<164>Sep 21 14:01:47 asa-dc-01 %ASA-4-106023: Deny tcp src outside:203.0.113.172/45512 dst inside:10.1.8.116/3306 by access-group "dmz_inbound_acl" [0x482c043f, 0x0]
+<162>Sep 21 14:01:49 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.91/32268 to 10.1.4.8/1433 flags SYN+ACK on interface outside
+<164>Sep 21 14:01:51 asa-core-fw %ASA-4-113019: Group = AnyConnect-VPN, Username = tpatel, IP = 198.51.100.18, Session disconnected. Session Type: SSL, Duration: 3h:09m:55s, Bytes xmt: 30994058, Bytes rcv: 6107814, Reason: User Requested
+<166>Sep 21 14:01:53 asa-vpn-gw01 %ASA-6-302013: Built outbound TCP connection 1001288 for outside:203.0.113.240/8080 (203.0.113.240/8080) to inside:10.1.2.9/31660 (198.51.100.224/31660)
+<166>Sep 21 14:01:55 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1001824 for outside:203.0.113.175/3306 to inside:10.1.8.37/11510 duration 0:03:23 bytes 1881161 Connection timeout
+<166>Sep 21 14:01:56 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1001759 for outside:198.51.100.26/123 (198.51.100.26/123) to inside:10.1.4.8/23305 (198.51.100.201/23305)
+<166>Sep 21 14:01:58 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1001689 for outside:203.0.113.137/123 to inside:10.1.4.175/24524 duration 0:00:25 bytes 3085
+<164>Sep 21 14:02:02 asa-edge-01 %ASA-4-106023: Deny tcp src outside:198.51.100.75/30624 dst inside:10.1.4.238/443 by access-group "dmz_inbound_acl" [0xa3676a02, 0x0]
+<162>Sep 21 14:02:04 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.219/15220 to 10.1.12.156/993 flags SYN+ACK on interface outside
+<164>Sep 21 14:02:04 asa-dc-01 %ASA-4-113019: Group = AnyConnect-VPN, Username = alewis, IP = 198.51.100.42, Session disconnected. Session Type: SSL, Duration: 3h:43m:23s, Bytes xmt: 4637608, Bytes rcv: 16987226, Reason: Session Timeout
+<166>Sep 21 14:02:06 asa-vpn-gw01 %ASA-6-302013: Built outbound TCP connection 1001914 for outside:198.51.100.12/8080 (198.51.100.12/8080) to inside:10.1.6.180/38651 (198.51.100.240/38651)
+<166>Sep 21 14:02:10 asa-core-fw %ASA-6-302014: Teardown TCP connection 1001534 for outside:203.0.113.143/1433 to inside:10.1.19.110/44433 duration 0:39:52 bytes 4056121 Reset-O
+<166>Sep 21 14:02:11 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1001436 for outside:198.51.100.26/123 (198.51.100.26/123) to inside:10.1.13.22/64682 (198.51.100.217/64682)
+<166>Sep 21 14:02:13 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1001467 for outside:203.0.113.166/161 to inside:10.1.4.8/31540 duration 0:00:07 bytes 2970
+<164>Sep 21 14:02:15 asa-dc-01 %ASA-4-106023: Deny tcp src outside:203.0.113.164/28345 dst inside:10.1.11.28/110 by access-group "outside_access_in" [0x4dc98290, 0x0]
+<162>Sep 21 14:02:18 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.176/25989 to 10.1.9.41/3306 flags FIN on interface outside
+<164>Sep 21 14:02:19 asa-edge-01 %ASA-4-113019: Group = Contractors-VPN, Username = agarcia, IP = 203.0.113.175, Session disconnected. Session Type: SSL, Duration: 2h:28m:47s, Bytes xmt: 36945945, Bytes rcv: 11109514, Reason: Session Timeout
+<166>Sep 21 14:02:22 asa-vpn-gw01 %ASA-6-302013: Built outbound TCP connection 1001468 for outside:198.51.100.98/443 (198.51.100.98/443) to inside:10.1.20.8/25348 (198.51.100.212/25348)
+<166>Sep 21 14:02:22 asa-core-fw %ASA-6-302014: Teardown TCP connection 1001404 for outside:203.0.113.57/3389 to inside:10.1.2.9/41972 duration 0:48:34 bytes 2374215 TCP FINs
+<166>Sep 21 14:02:24 asa-dc-01 %ASA-6-302015: Built inbound UDP connection 1001457 for outside:198.51.100.21/161 (198.51.100.21/161) to inside:10.1.18.109/30049 (198.51.100.234/30049)
+<166>Sep 21 14:02:26 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1001808 for outside:203.0.113.164/53 to inside:10.1.20.8/18515 duration 0:00:04 bytes 7213
+<164>Sep 21 14:02:30 asa-dc-01 %ASA-4-106023: Deny udp src outside:203.0.113.180/32568 dst inside:10.1.6.180/22 by access-group "dmz_inbound_acl" [0x2d34d08e, 0x0]
+<162>Sep 21 14:02:30 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.137/51491 to 10.1.8.37/1433 flags SYN+ACK on interface outside
+<164>Sep 21 14:02:32 asa-dc-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = mkowalski, IP = 203.0.113.84, Session disconnected. Session Type: SSL, Duration: 3h:29m:58s, Bytes xmt: 29720503, Bytes rcv: 9987515, Reason: Administrator Reset
+<166>Sep 21 14:02:35 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1001892 for outside:198.51.100.50/3306 (198.51.100.50/3306) to inside:10.1.11.28/50192 (198.51.100.206/50192)
+<166>Sep 21 14:02:38 asa-core-fw %ASA-6-302014: Teardown TCP connection 1001597 for outside:198.51.100.18/53 to inside:10.1.4.93/20532 duration 0:35:05 bytes 1313340 TCP FINs
+<166>Sep 21 14:02:39 asa-vpn-gw01 %ASA-6-302015: Built outbound UDP connection 1002049 for outside:203.0.113.175/5060 (203.0.113.175/5060) to inside:10.1.11.28/29327 (198.51.100.214/29327)
+<166>Sep 21 14:02:41 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1001433 for outside:198.51.100.222/123 to inside:10.1.4.93/27577 duration 0:00:19 bytes 5480
+<164>Sep 21 14:02:43 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.98/20004 dst inside:10.1.3.57/3389 by access-group "outside_access_in" [0x3a79ea68, 0x0]
+<162>Sep 21 14:02:45 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.240/55373 to 10.1.4.175/3389 flags ACK on interface outside
+<164>Sep 21 14:02:48 asa-vpn-gw01 %ASA-4-113019: Group = Contractors-VPN, Username = mkowalski, IP = 198.51.100.93, Session disconnected. Session Type: SSL, Duration: 0h:15m:43s, Bytes xmt: 38610958, Bytes rcv: 19710576, Reason: User Requested
+<166>Sep 21 14:02:50 asa-dc-01 %ASA-6-302013: Built outbound TCP connection 1002019 for outside:203.0.113.176/22 (203.0.113.176/22) to inside:10.1.9.64/59802 (198.51.100.230/59802)
+<166>Sep 21 14:02:51 asa-core-fw %ASA-6-302014: Teardown TCP connection 1002045 for outside:203.0.113.119/25 to inside:10.1.19.73/63602 duration 0:30:23 bytes 3425722 Reset-I
+<166>Sep 21 14:02:53 asa-edge-01 %ASA-6-302015: Built outbound UDP connection 1002341 for outside:198.51.100.94/5060 (198.51.100.94/5060) to inside:10.1.19.110/37217 (198.51.100.231/37217)
+<166>Sep 21 14:02:55 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1001945 for outside:198.51.100.214/4500 to inside:10.1.8.37/26781 duration 0:00:25 bytes 3375
+<164>Sep 21 14:02:56 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:198.51.100.219/44216 dst inside:10.1.9.64/8080 by access-group "perimeter_filter" [0x81299889, 0x0]
+<162>Sep 21 14:02:58 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 198.51.100.59/29116 to 10.1.9.41/25 flags SYN on interface outside
+<164>Sep 21 14:03:00 asa-core-fw %ASA-4-113019: Group = AnyConnect-VPN, Username = bwilson, IP = 198.51.100.222, Session disconnected. Session Type: SSL, Duration: 0h:30m:07s, Bytes xmt: 43477061, Bytes rcv: 27932091, Reason: Idle Timeout
+<166>Sep 21 14:03:03 asa-dc-01 %ASA-6-302013: Built outbound TCP connection 1002069 for outside:198.51.100.72/123 (198.51.100.72/123) to inside:10.1.12.156/37469 (198.51.100.230/37469)
+<166>Sep 21 14:03:04 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1002129 for outside:198.51.100.91/993 to inside:10.1.18.24/22731 duration 0:47:57 bytes 1145364 Flow Closed by Inspection
+<166>Sep 21 14:03:06 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1002373 for outside:203.0.113.172/53 (203.0.113.172/53) to inside:10.1.15.139/32514 (198.51.100.232/32514)
+<166>Sep 21 14:03:09 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1002456 for outside:203.0.113.187/500 to inside:10.1.7.247/53489 duration 0:00:15 bytes 4476
+<164>Sep 21 14:03:11 asa-dc-01 %ASA-4-106023: Deny tcp src outside:203.0.113.163/34960 dst inside:10.1.2.188/25 by access-group "perimeter_filter" [0x4d225c30, 0x0]
+<162>Sep 21 14:03:14 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.84/37160 to 10.1.13.22/80 flags FIN on interface outside
+<164>Sep 21 14:03:16 asa-vpn-gw01 %ASA-4-113019: Group = Contractors-VPN, Username = dchen, IP = 198.51.100.12, Session disconnected. Session Type: SSL, Duration: 3h:07m:33s, Bytes xmt: 30673924, Bytes rcv: 524979, Reason: Idle Timeout
+<166>Sep 21 14:03:17 asa-core-fw %ASA-6-302013: Built inbound TCP connection 1001743 for outside:198.51.100.98/993 (198.51.100.98/993) to inside:10.1.6.180/32427 (198.51.100.225/32427)
+<166>Sep 21 14:03:19 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1002661 for outside:203.0.113.119/5060 to inside:10.1.18.52/57341 duration 0:55:35 bytes 301393 Idle Timeout
+<166>Sep 21 14:03:20 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1002347 for outside:198.51.100.117/53 (198.51.100.117/53) to inside:10.1.4.93/25148 (198.51.100.205/25148)
+<166>Sep 21 14:03:24 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1002172 for outside:203.0.113.164/53 to inside:10.1.19.110/29865 duration 0:00:11 bytes 6586
+<164>Sep 21 14:03:25 asa-dc-01 %ASA-4-106023: Deny tcp src outside:198.51.100.198/26243 dst inside:10.1.19.73/110 by access-group "outside_access_in" [0x3cd1586a, 0x0]
+<162>Sep 21 14:03:26 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.26/42855 to 10.1.4.93/993 flags SYN+ACK on interface outside
+<164>Sep 21 14:03:29 asa-dc-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = agarcia, IP = 198.51.100.181, Session disconnected. Session Type: SSL, Duration: 3h:23m:37s, Bytes xmt: 20085901, Bytes rcv: 21449225, Reason: Connection Lost
+<166>Sep 21 14:03:32 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1002253 for outside:198.51.100.163/8443 (198.51.100.163/8443) to inside:10.1.13.22/23295 (198.51.100.230/23295)
+<166>Sep 21 14:03:32 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1002388 for outside:203.0.113.137/3306 to inside:10.1.18.109/29630 duration 0:01:54 bytes 3320509 Reset-I
+<166>Sep 21 14:03:34 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1002752 for outside:203.0.113.57/4500 (203.0.113.57/4500) to inside:10.1.11.28/42793 (198.51.100.218/42793)
+<166>Sep 21 14:03:37 asa-core-fw %ASA-6-302016: Teardown UDP connection 1002488 for outside:203.0.113.42/5060 to inside:10.1.2.9/26665 duration 0:00:21 bytes 859
+<164>Sep 21 14:03:40 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.180/12426 dst inside:10.1.15.139/993 by access-group "outside_access_in" [0xf8dd5e5a, 0x0]
+<162>Sep 21 14:03:41 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.21/23399 to 10.1.19.73/22 flags ACK on interface outside
+<164>Sep 21 14:03:44 asa-dc-01 %ASA-4-113019: Group = Contractors-VPN, Username = tpatel, IP = 198.51.100.170, Session disconnected. Session Type: SSL, Duration: 3h:05m:09s, Bytes xmt: 15150745, Bytes rcv: 28871529, Reason: Connection Lost
+<166>Sep 21 14:03:46 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1001997 for outside:203.0.113.54/3389 (203.0.113.54/3389) to inside:10.1.15.139/11152 (198.51.100.234/11152)
+<166>Sep 21 14:03:47 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1002610 for outside:203.0.113.237/993 to inside:10.1.9.208/27421 duration 0:52:41 bytes 3116396 TCP FINs
+<166>Sep 21 14:03:50 asa-core-fw %ASA-6-302015: Built inbound UDP connection 1002421 for outside:203.0.113.42/5060 (203.0.113.42/5060) to inside:10.1.4.8/47032 (198.51.100.239/47032)
+<166>Sep 21 14:03:50 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1002887 for outside:198.51.100.163/53 to inside:10.1.12.156/52788 duration 0:00:05 bytes 435
+<164>Sep 21 14:03:53 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:198.51.100.26/45468 dst inside:10.1.4.175/22 by access-group "dmz_inbound_acl" [0xbba4fc03, 0x0]
+<162>Sep 21 14:03:56 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.143/20366 to 10.1.9.208/8443 flags FIN on interface outside
+<164>Sep 21 14:03:58 asa-vpn-gw01 %ASA-4-113019: Group = DefaultRAGroup, Username = bwilson, IP = 198.51.100.26, Session disconnected. Session Type: SSL, Duration: 2h:07m:43s, Bytes xmt: 24661431, Bytes rcv: 18279242, Reason: Session Timeout
+<166>Sep 21 14:03:58 asa-vpn-gw01 %ASA-6-302013: Built inbound TCP connection 1002306 for outside:198.51.100.170/25 (198.51.100.170/25) to inside:10.1.2.9/64254 (198.51.100.205/64254)
+<166>Sep 21 14:04:02 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1002092 for outside:198.51.100.94/22 to inside:10.1.15.139/26202 duration 0:13:05 bytes 1738011 Idle Timeout
+<166>Sep 21 14:04:02 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1002394 for outside:198.51.100.198/123 (198.51.100.198/123) to inside:10.1.2.188/61924 (198.51.100.200/61924)
+<166>Sep 21 14:04:04 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1002892 for outside:198.51.100.170/161 to inside:10.1.19.110/53563 duration 0:00:05 bytes 185
+<164>Sep 21 14:04:06 asa-dc-01 %ASA-4-106023: Deny tcp src outside:198.51.100.98/13674 dst inside:10.1.19.110/22 by access-group "perimeter_filter" [0x204556e5, 0x0]
+<162>Sep 21 14:04:09 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.19/49146 to 10.1.18.109/443 flags RST on interface outside
+<164>Sep 21 14:04:10 asa-edge-01 %ASA-4-113019: Group = AnyConnect-VPN, Username = tpatel, IP = 198.51.100.50, Session disconnected. Session Type: SSL, Duration: 3h:55m:25s, Bytes xmt: 28616738, Bytes rcv: 23031611, Reason: User Requested
+<166>Sep 21 14:04:13 asa-vpn-gw01 %ASA-6-302013: Built inbound TCP connection 1002218 for outside:198.51.100.18/993 (198.51.100.18/993) to inside:10.1.18.77/31349 (198.51.100.209/31349)
+<166>Sep 21 14:04:14 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1002799 for outside:203.0.113.187/3306 to inside:10.1.3.99/46177 duration 0:24:39 bytes 4450883 Reset-I
+<166>Sep 21 14:04:17 asa-vpn-gw01 %ASA-6-302015: Built inbound UDP connection 1002278 for outside:203.0.113.164/500 (203.0.113.164/500) to inside:10.1.15.139/17738 (198.51.100.235/17738)
+<166>Sep 21 14:04:19 asa-core-fw %ASA-6-302016: Teardown UDP connection 1002617 for outside:203.0.113.240/161 to inside:10.1.18.52/36371 duration 0:00:11 bytes 3560
+<164>Sep 21 14:04:22 asa-dc-01 %ASA-4-106023: Deny tcp src outside:203.0.113.237/41321 dst inside:10.1.18.24/443 by access-group "outside_access_in" [0x7e8f75a1, 0x0]
+<162>Sep 21 14:04:22 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.44/14170 to 10.1.18.24/993 flags RST on interface outside
+<164>Sep 21 14:04:25 asa-edge-01 %ASA-4-113019: Group = Contractors-VPN, Username = agarcia, IP = 198.51.100.42, Session disconnected. Session Type: SSL, Duration: 0h:37m:32s, Bytes xmt: 14286659, Bytes rcv: 5201883, Reason: Connection Lost
+<166>Sep 21 14:04:26 asa-edge-01 %ASA-6-302013: Built inbound TCP connection 1002620 for outside:203.0.113.44/443 (203.0.113.44/443) to inside:10.1.13.22/34328 (198.51.100.217/34328)
+<166>Sep 21 14:04:29 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1002902 for outside:203.0.113.70/3306 to inside:10.1.20.228/64599 duration 0:01:12 bytes 2292608 Connection timeout
+<166>Sep 21 14:04:31 asa-dc-01 %ASA-6-302015: Built inbound UDP connection 1002655 for outside:198.51.100.21/123 (198.51.100.21/123) to inside:10.1.4.8/19628 (198.51.100.225/19628)
+<166>Sep 21 14:04:34 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1002406 for outside:203.0.113.156/123 to inside:10.1.9.208/24338 duration 0:00:15 bytes 2856
+<164>Sep 21 14:04:35 asa-dc-01 %ASA-4-106023: Deny tcp src outside:203.0.113.84/47437 dst inside:10.1.18.52/993 by access-group "outside_access_in" [0x384c03d2, 0x0]
+<162>Sep 21 14:04:38 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.72/39279 to 10.1.8.37/1433 flags FIN on interface outside
+<164>Sep 21 14:04:40 asa-vpn-gw01 %ASA-4-113019: Group = DefaultRAGroup, Username = agarcia, IP = 198.51.100.170, Session disconnected. Session Type: SSL, Duration: 2h:44m:43s, Bytes xmt: 39814565, Bytes rcv: 16338685, Reason: Administrator Reset
+<166>Sep 21 14:04:42 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1002427 for outside:203.0.113.54/80 (203.0.113.54/80) to inside:10.1.3.57/49517 (198.51.100.200/49517)
+<166>Sep 21 14:04:43 asa-core-fw %ASA-6-302014: Teardown TCP connection 1003183 for outside:203.0.113.176/3389 to inside:10.1.18.24/26985 duration 0:07:01 bytes 4172620 Connection timeout
+<166>Sep 21 14:04:45 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1002547 for outside:203.0.113.163/53 (203.0.113.163/53) to inside:10.1.8.116/56355 (198.51.100.232/56355)
+<166>Sep 21 14:04:47 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1002878 for outside:203.0.113.240/4500 to inside:10.1.4.8/15342 duration 0:00:19 bytes 3580
+<164>Sep 21 14:04:49 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:203.0.113.54/11606 dst inside:10.1.4.175/8080 by access-group "perimeter_filter" [0xfb7607c9, 0x0]
+<162>Sep 21 14:04:51 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.12/26185 to 10.1.13.22/8443 flags FIN on interface outside
+<164>Sep 21 14:04:54 asa-edge-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = agarcia, IP = 198.51.100.181, Session disconnected. Session Type: SSL, Duration: 0h:34m:32s, Bytes xmt: 13022657, Bytes rcv: 26055897, Reason: Session Timeout
+<166>Sep 21 14:04:55 asa-core-fw %ASA-6-302013: Built inbound TCP connection 1002741 for outside:198.51.100.198/53 (198.51.100.198/53) to inside:10.1.4.175/27015 (198.51.100.211/27015)
+<166>Sep 21 14:04:58 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1002698 for outside:203.0.113.119/25 to inside:10.1.2.188/42622 duration 0:48:38 bytes 3765940 Connection timeout
+<166>Sep 21 14:05:00 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1003418 for outside:198.51.100.214/500 (198.51.100.214/500) to inside:10.1.3.99/20133 (198.51.100.204/20133)
+<166>Sep 21 14:05:02 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1003366 for outside:203.0.113.187/500 to inside:10.1.8.131/13921 duration 0:00:03 bytes 2606
+<164>Sep 21 14:05:03 asa-edge-01 %ASA-4-106023: Deny udp src outside:198.51.100.117/15268 dst inside:10.1.18.109/1433 by access-group "dmz_inbound_acl" [0xa49077c2, 0x0]
+<162>Sep 21 14:05:06 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.137/52958 to 10.1.20.228/53 flags RST on interface outside
+<164>Sep 21 14:05:07 asa-core-fw %ASA-4-113019: Group = AnyConnect-VPN, Username = tpatel, IP = 203.0.113.19, Session disconnected. Session Type: SSL, Duration: 1h:03m:15s, Bytes xmt: 47497688, Bytes rcv: 14698730, Reason: Connection Lost
+<166>Sep 21 14:05:10 asa-core-fw %ASA-6-302013: Built inbound TCP connection 1002991 for outside:198.51.100.117/8443 (198.51.100.117/8443) to inside:10.1.18.109/35629 (198.51.100.221/35629)
+<166>Sep 21 14:05:12 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1002703 for outside:198.51.100.12/1433 to inside:10.1.18.52/46806 duration 0:18:17 bytes 1261672 Reset-I
+<166>Sep 21 14:05:12 asa-core-fw %ASA-6-302015: Built inbound UDP connection 1003591 for outside:198.51.100.163/4500 (198.51.100.163/4500) to inside:10.1.18.109/53235 (198.51.100.225/53235)
+<166>Sep 21 14:05:16 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1002987 for outside:198.51.100.91/5060 to inside:10.1.9.41/52411 duration 0:00:27 bytes 1110
+<164>Sep 21 14:05:18 asa-edge-01 %ASA-4-106023: Deny udp src outside:203.0.113.69/43564 dst inside:10.1.4.93/8080 by access-group "dmz_inbound_acl" [0x3e25b5ee, 0x0]
+<162>Sep 21 14:05:18 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.166/22823 to 10.1.2.188/53 flags SYN+ACK on interface outside
+<164>Sep 21 14:05:20 asa-dc-01 %ASA-4-113019: Group = AnyConnect-VPN, Username = alewis, IP = 203.0.113.70, Session disconnected. Session Type: SSL, Duration: 2h:57m:49s, Bytes xmt: 41485389, Bytes rcv: 4407276, Reason: Administrator Reset
+<166>Sep 21 14:05:23 asa-core-fw %ASA-6-302013: Built outbound TCP connection 1002904 for outside:203.0.113.164/993 (203.0.113.164/993) to inside:10.1.19.110/60774 (198.51.100.210/60774)
+<166>Sep 21 14:05:24 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1003128 for outside:203.0.113.143/25 to inside:10.1.4.93/25806 duration 0:18:49 bytes 3766130 SYN Timeout
+<166>Sep 21 14:05:28 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1003088 for outside:203.0.113.175/500 (203.0.113.175/500) to inside:10.1.15.139/64969 (198.51.100.223/64969)
+<166>Sep 21 14:05:29 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1003303 for outside:203.0.113.172/123 to inside:10.1.14.89/20860 duration 0:00:26 bytes 5017
+<164>Sep 21 14:05:31 asa-edge-01 %ASA-4-106023: Deny tcp src outside:198.51.100.95/46582 dst inside:10.1.6.180/443 by access-group "dmz_inbound_acl" [0x2578d709, 0x0]
+<162>Sep 21 14:05:32 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.19/19896 to 10.1.18.77/123 flags SYN on interface outside
+<164>Sep 21 14:05:34 asa-vpn-gw01 %ASA-4-113019: Group = Contractors-VPN, Username = mkowalski, IP = 198.51.100.26, Session disconnected. Session Type: SSL, Duration: 3h:06m:23s, Bytes xmt: 15078541, Bytes rcv: 955817, Reason: Session Timeout
+<166>Sep 21 14:05:36 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1003667 for outside:198.51.100.59/3389 (198.51.100.59/3389) to inside:10.1.18.24/12750 (198.51.100.230/12750)
+<166>Sep 21 14:05:40 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1003333 for outside:198.51.100.221/80 to inside:10.1.11.28/15432 duration 0:13:54 bytes 1254511 Idle Timeout
+<166>Sep 21 14:05:42 asa-vpn-gw01 %ASA-6-302015: Built inbound UDP connection 1003004 for outside:198.51.100.117/123 (198.51.100.117/123) to inside:10.1.2.188/25813 (198.51.100.207/25813)
+<166>Sep 21 14:05:43 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1002972 for outside:203.0.113.166/4500 to inside:10.1.4.175/49347 duration 0:00:21 bytes 4285
+<164>Sep 21 14:05:44 asa-core-fw %ASA-4-106023: Deny udp src outside:198.51.100.221/50532 dst inside:10.1.19.73/8080 by access-group "outside_access_in" [0xba143cd8, 0x0]
+<162>Sep 21 14:05:48 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.181/44715 to 10.1.18.109/110 flags RST on interface outside
+<164>Sep 21 14:05:50 asa-edge-01 %ASA-4-113019: Group = Contractors-VPN, Username = agarcia, IP = 203.0.113.57, Session disconnected. Session Type: SSL, Duration: 0h:23m:50s, Bytes xmt: 4543845, Bytes rcv: 11579651, Reason: Idle Timeout
+<166>Sep 21 14:05:52 asa-edge-01 %ASA-6-302013: Built inbound TCP connection 1003766 for outside:203.0.113.57/8080 (203.0.113.57/8080) to inside:10.1.7.247/59829 (198.51.100.208/59829)
+<166>Sep 21 14:05:53 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1003826 for outside:198.51.100.21/5060 to inside:10.1.3.99/64660 duration 0:44:31 bytes 1529308 Flow Closed by Inspection
+<166>Sep 21 14:05:54 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1003743 for outside:203.0.113.240/123 (203.0.113.240/123) to inside:10.1.2.188/12663 (198.51.100.212/12663)
+<166>Sep 21 14:05:56 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1003982 for outside:203.0.113.19/53 to inside:10.1.20.8/36338 duration 0:00:16 bytes 2139
+<164>Sep 21 14:06:00 asa-core-fw %ASA-4-106023: Deny udp src outside:203.0.113.84/13372 dst inside:10.1.18.109/123 by access-group "outside_access_in" [0xdca1b45c, 0x0]
+<162>Sep 21 14:06:01 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.57/39058 to 10.1.8.116/8443 flags SYN+ACK on interface outside
+<164>Sep 21 14:06:03 asa-vpn-gw01 %ASA-4-113019: Group = DefaultRAGroup, Username = tpatel, IP = 198.51.100.18, Session disconnected. Session Type: SSL, Duration: 3h:39m:52s, Bytes xmt: 12120229, Bytes rcv: 18313083, Reason: Session Timeout
+<166>Sep 21 14:06:05 asa-edge-01 %ASA-6-302013: Built outbound TCP connection 1003176 for outside:203.0.113.70/3389 (203.0.113.70/3389) to inside:10.1.18.52/29615 (198.51.100.228/29615)
+<166>Sep 21 14:06:06 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1003471 for outside:198.51.100.148/123 to inside:10.1.1.196/57872 duration 0:39:28 bytes 2303387 Connection timeout
+<166>Sep 21 14:06:08 asa-edge-01 %ASA-6-302015: Built inbound UDP connection 1003816 for outside:203.0.113.54/123 (203.0.113.54/123) to inside:10.1.3.99/34049 (198.51.100.210/34049)
+<166>Sep 21 14:06:12 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1003181 for outside:198.51.100.181/4500 to inside:10.1.18.24/25706 duration 0:00:12 bytes 3200
+<164>Sep 21 14:06:12 asa-core-fw %ASA-4-106023: Deny tcp src outside:198.51.100.95/34620 dst inside:10.1.1.196/25 by access-group "perimeter_filter" [0x6df06e8c, 0x0]
+<162>Sep 21 14:06:15 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.26/17674 to 10.1.8.131/80 flags FIN on interface outside
+<164>Sep 21 14:06:18 asa-vpn-gw01 %ASA-4-113019: Group = DefaultRAGroup, Username = tpatel, IP = 198.51.100.60, Session disconnected. Session Type: SSL, Duration: 2h:45m:58s, Bytes xmt: 32973887, Bytes rcv: 6726870, Reason: User Requested
+<166>Sep 21 14:06:18 asa-edge-01 %ASA-6-302013: Built outbound TCP connection 1003676 for outside:203.0.113.177/443 (203.0.113.177/443) to inside:10.1.19.110/39410 (198.51.100.220/39410)
+<166>Sep 21 14:06:22 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1003794 for outside:198.51.100.117/123 to inside:10.1.9.41/29897 duration 0:45:46 bytes 1460631 Flow Closed by Inspection
+<166>Sep 21 14:06:23 asa-core-fw %ASA-6-302015: Built inbound UDP connection 1003372 for outside:198.51.100.59/161 (198.51.100.59/161) to inside:10.1.2.9/25754 (198.51.100.231/25754)
+<166>Sep 21 14:06:26 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1003743 for outside:203.0.113.44/500 to inside:10.1.15.139/18744 duration 0:00:03 bytes 2597
+<164>Sep 21 14:06:28 asa-vpn-gw01 %ASA-4-106023: Deny tcp src outside:203.0.113.84/37072 dst inside:10.1.19.73/123 by access-group "outside_access_in" [0x6128b9b1, 0x0]
+<162>Sep 21 14:06:30 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.237/44145 to 10.1.1.196/8080 flags RST on interface outside
+<164>Sep 21 14:06:32 asa-core-fw %ASA-4-113019: Group = AnyConnect-VPN, Username = alewis, IP = 203.0.113.156, Session disconnected. Session Type: SSL, Duration: 1h:20m:10s, Bytes xmt: 10879418, Bytes rcv: 10836698, Reason: Idle Timeout
+<166>Sep 21 14:06:33 asa-dc-01 %ASA-6-302013: Built outbound TCP connection 1004199 for outside:198.51.100.98/1433 (198.51.100.98/1433) to inside:10.1.8.37/23104 (198.51.100.235/23104)
+<166>Sep 21 14:06:34 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1003979 for outside:198.51.100.18/1433 to inside:10.1.9.41/43176 duration 0:37:38 bytes 1293725 SYN Timeout
+<166>Sep 21 14:06:38 asa-dc-01 %ASA-6-302015: Built inbound UDP connection 1004229 for outside:203.0.113.137/53 (203.0.113.137/53) to inside:10.1.20.228/12939 (198.51.100.201/12939)
+<166>Sep 21 14:06:40 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1004050 for outside:203.0.113.84/500 to inside:10.1.2.9/47735 duration 0:00:21 bytes 312
+<164>Sep 21 14:06:42 asa-dc-01 %ASA-4-106023: Deny udp src outside:203.0.113.175/26288 dst inside:10.1.20.8/5060 by access-group "dmz_inbound_acl" [0x22ae5c22, 0x0]
+<162>Sep 21 14:06:44 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.172/41975 to 10.1.1.196/25 flags ACK on interface outside
+<164>Sep 21 14:06:46 asa-core-fw %ASA-4-113019: Group = RemoteAccess-Corp, Username = bwilson, IP = 203.0.113.176, Session disconnected. Session Type: SSL, Duration: 2h:33m:35s, Bytes xmt: 7135883, Bytes rcv: 10717752, Reason: Idle Timeout
+<166>Sep 21 14:06:47 asa-edge-01 %ASA-6-302013: Built outbound TCP connection 1003725 for outside:198.51.100.26/443 (198.51.100.26/443) to inside:10.1.1.196/19472 (198.51.100.203/19472)
+<166>Sep 21 14:06:49 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1003723 for outside:198.51.100.75/8080 to inside:10.1.13.22/63552 duration 0:46:21 bytes 1592693 Flow Closed by Inspection
+<166>Sep 21 14:06:50 asa-vpn-gw01 %ASA-6-302015: Built inbound UDP connection 1004013 for outside:203.0.113.166/500 (203.0.113.166/500) to inside:10.1.1.196/30460 (198.51.100.201/30460)
+<166>Sep 21 14:06:54 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1004492 for outside:198.51.100.60/500 to inside:10.1.3.57/48470 duration 0:00:02 bytes 2368
+<164>Sep 21 14:06:56 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:198.51.100.221/17284 dst inside:10.1.9.41/8443 by access-group "perimeter_filter" [0x6da39a73, 0x0]
+<162>Sep 21 14:06:57 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.50/47613 to 10.1.8.116/110 flags ACK on interface outside
+<164>Sep 21 14:07:00 asa-dc-01 %ASA-4-113019: Group = AnyConnect-VPN, Username = agarcia, IP = 198.51.100.59, Session disconnected. Session Type: SSL, Duration: 0h:26m:23s, Bytes xmt: 22765629, Bytes rcv: 18727730, Reason: Session Timeout
+<166>Sep 21 14:07:00 asa-core-fw %ASA-6-302013: Built inbound TCP connection 1004187 for outside:203.0.113.54/80 (203.0.113.54/80) to inside:10.1.14.89/43013 (198.51.100.202/43013)
+<166>Sep 21 14:07:02 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1004411 for outside:203.0.113.156/22 to inside:10.1.6.180/40189 duration 0:57:33 bytes 1172817 Reset-I
+<166>Sep 21 14:07:06 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1003771 for outside:203.0.113.42/4500 (203.0.113.42/4500) to inside:10.1.8.116/58692 (198.51.100.219/58692)
+<166>Sep 21 14:07:08 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1004347 for outside:198.51.100.163/5060 to inside:10.1.7.247/41362 duration 0:00:12 bytes 2777
+<164>Sep 21 14:07:08 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:203.0.113.143/55331 dst inside:10.1.20.8/1433 by access-group "dmz_inbound_acl" [0xb7d4cf50, 0x0]
+<162>Sep 21 14:07:12 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 203.0.113.187/41726 to 10.1.9.64/22 flags RST on interface outside
+<164>Sep 21 14:07:13 asa-core-fw %ASA-4-113019: Group = AnyConnect-VPN, Username = dchen, IP = 203.0.113.180, Session disconnected. Session Type: SSL, Duration: 2h:27m:09s, Bytes xmt: 27723283, Bytes rcv: 23179344, Reason: Idle Timeout
+<166>Sep 21 14:07:15 asa-vpn-gw01 %ASA-6-302013: Built inbound TCP connection 1004583 for outside:203.0.113.57/80 (203.0.113.57/80) to inside:10.1.13.22/57911 (198.51.100.208/57911)
+<166>Sep 21 14:07:18 asa-dc-01 %ASA-6-302014: Teardown TCP connection 1004385 for outside:203.0.113.156/8080 to inside:10.1.6.180/34935 duration 0:29:59 bytes 4472443 Reset-I
+<166>Sep 21 14:07:20 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1004416 for outside:203.0.113.143/123 (203.0.113.143/123) to inside:10.1.2.188/54853 (198.51.100.216/54853)
+<166>Sep 21 14:07:20 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1004312 for outside:198.51.100.222/5060 to inside:10.1.20.8/29744 duration 0:00:23 bytes 1762
+<164>Sep 21 14:07:24 asa-vpn-gw01 %ASA-4-106023: Deny udp src outside:198.51.100.42/46972 dst inside:10.1.6.180/5060 by access-group "outside_access_in" [0xa2cf6021, 0x0]
+<162>Sep 21 14:07:26 asa-vpn-gw01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.42/60903 to 10.1.8.116/5060 flags ACK on interface outside
+<164>Sep 21 14:07:26 asa-dc-01 %ASA-4-113019: Group = DefaultRAGroup, Username = tpatel, IP = 198.51.100.60, Session disconnected. Session Type: SSL, Duration: 1h:53m:34s, Bytes xmt: 18205408, Bytes rcv: 18868195, Reason: Session Timeout
+<166>Sep 21 14:07:28 asa-edge-01 %ASA-6-302013: Built inbound TCP connection 1004439 for outside:203.0.113.187/53 (203.0.113.187/53) to inside:10.1.9.208/25921 (198.51.100.203/25921)
+<166>Sep 21 14:07:32 asa-core-fw %ASA-6-302014: Teardown TCP connection 1003879 for outside:203.0.113.172/3306 to inside:10.1.4.175/31886 duration 0:06:44 bytes 1153407 TCP FINs
+<166>Sep 21 14:07:34 asa-core-fw %ASA-6-302015: Built outbound UDP connection 1004259 for outside:203.0.113.175/161 (203.0.113.175/161) to inside:10.1.3.99/41530 (198.51.100.212/41530)
+<166>Sep 21 14:07:35 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1004789 for outside:198.51.100.18/5060 to inside:10.1.2.188/52989 duration 0:00:18 bytes 6115
+<164>Sep 21 14:07:36 asa-core-fw %ASA-4-106023: Deny udp src outside:198.51.100.21/12621 dst inside:10.1.18.77/123 by access-group "outside_access_in" [0xffc59738, 0x0]
+<162>Sep 21 14:07:40 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.221/29795 to 10.1.9.64/993 flags SYN on interface outside
+<164>Sep 21 14:07:41 asa-dc-01 %ASA-4-113019: Group = DefaultRAGroup, Username = alewis, IP = 198.51.100.72, Session disconnected. Session Type: SSL, Duration: 1h:52m:07s, Bytes xmt: 22201834, Bytes rcv: 5462402, Reason: Connection Lost
+<166>Sep 21 14:07:44 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1004663 for outside:198.51.100.221/8080 (198.51.100.221/8080) to inside:10.1.19.110/58514 (198.51.100.218/58514)
+<166>Sep 21 14:07:44 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1004791 for outside:203.0.113.19/443 to inside:10.1.19.73/31731 duration 0:42:07 bytes 1550307 SYN Timeout
+<166>Sep 21 14:07:47 asa-dc-01 %ASA-6-302015: Built outbound UDP connection 1004920 for outside:198.51.100.221/161 (198.51.100.221/161) to inside:10.1.3.57/27330 (198.51.100.215/27330)
+<166>Sep 21 14:07:49 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1004575 for outside:203.0.113.137/53 to inside:10.1.9.208/10989 duration 0:00:23 bytes 1999
+<164>Sep 21 14:07:52 asa-edge-01 %ASA-4-106023: Deny udp src outside:198.51.100.75/36809 dst inside:10.1.20.8/1433 by access-group "perimeter_filter" [0x2e0ef546, 0x0]
+<162>Sep 21 14:07:54 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.222/24600 to 10.1.11.28/22 flags SYN+ACK on interface outside
+<164>Sep 21 14:07:55 asa-dc-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = alewis, IP = 203.0.113.176, Session disconnected. Session Type: SSL, Duration: 1h:44m:48s, Bytes xmt: 39994431, Bytes rcv: 29307550, Reason: User Requested
+<166>Sep 21 14:07:58 asa-vpn-gw01 %ASA-6-302013: Built inbound TCP connection 1004587 for outside:198.51.100.95/993 (198.51.100.95/993) to inside:10.1.12.156/15358 (198.51.100.207/15358)
+<166>Sep 21 14:08:00 asa-core-fw %ASA-6-302014: Teardown TCP connection 1004650 for outside:198.51.100.198/8080 to inside:10.1.9.41/21023 duration 0:28:08 bytes 1723282 Connection timeout
+<166>Sep 21 14:08:02 asa-vpn-gw01 %ASA-6-302015: Built outbound UDP connection 1004174 for outside:203.0.113.19/123 (203.0.113.19/123) to inside:10.1.18.77/39435 (198.51.100.203/39435)
+<166>Sep 21 14:08:04 asa-vpn-gw01 %ASA-6-302016: Teardown UDP connection 1004565 for outside:198.51.100.50/500 to inside:10.1.7.247/46861 duration 0:00:24 bytes 242
+<164>Sep 21 14:08:05 asa-edge-01 %ASA-4-106023: Deny udp src outside:203.0.113.187/15026 dst inside:10.1.2.9/80 by access-group "perimeter_filter" [0x205291d3, 0x0]
+<162>Sep 21 14:08:08 asa-edge-01 %ASA-2-106001: Inbound TCP connection denied from 198.51.100.181/41177 to 10.1.18.77/80 flags FIN on interface outside
+<164>Sep 21 14:08:08 asa-core-fw %ASA-4-113019: Group = DefaultRAGroup, Username = bwilson, IP = 198.51.100.91, Session disconnected. Session Type: SSL, Duration: 3h:06m:43s, Bytes xmt: 44422145, Bytes rcv: 29355153, Reason: Administrator Reset
+<166>Sep 21 14:08:10 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1004287 for outside:203.0.113.163/110 (203.0.113.163/110) to inside:10.1.19.110/35999 (198.51.100.208/35999)
+<166>Sep 21 14:08:12 asa-edge-01 %ASA-6-302014: Teardown TCP connection 1004488 for outside:203.0.113.237/110 to inside:10.1.1.196/57366 duration 0:34:25 bytes 1926811 SYN Timeout
+<166>Sep 21 14:08:15 asa-dc-01 %ASA-6-302015: Built inbound UDP connection 1004358 for outside:198.51.100.219/5060 (198.51.100.219/5060) to inside:10.1.8.131/57755 (198.51.100.207/57755)
+<166>Sep 21 14:08:17 asa-edge-01 %ASA-6-302016: Teardown UDP connection 1004463 for outside:198.51.100.181/5060 to inside:10.1.2.9/16852 duration 0:00:15 bytes 4961
+<164>Sep 21 14:08:20 asa-edge-01 %ASA-4-106023: Deny tcp src outside:198.51.100.148/36602 dst inside:10.1.9.208/25 by access-group "outside_access_in" [0x33dfecd7, 0x0]
+<162>Sep 21 14:08:22 asa-dc-01 %ASA-2-106001: Inbound TCP connection denied from 203.0.113.143/47995 to 10.1.4.238/8080 flags RST on interface outside
+<164>Sep 21 14:08:24 asa-dc-01 %ASA-4-113019: Group = Contractors-VPN, Username = bwilson, IP = 198.51.100.72, Session disconnected. Session Type: SSL, Duration: 0h:36m:37s, Bytes xmt: 49349249, Bytes rcv: 5886494, Reason: Connection Lost
+<166>Sep 21 14:08:26 asa-vpn-gw01 %ASA-6-302013: Built outbound TCP connection 1004333 for outside:203.0.113.98/8443 (203.0.113.98/8443) to inside:10.1.18.109/54237 (198.51.100.233/54237)
+<166>Sep 21 14:08:28 asa-vpn-gw01 %ASA-6-302014: Teardown TCP connection 1004720 for outside:198.51.100.163/22 to inside:10.1.18.24/34911 duration 0:30:16 bytes 1890577 Reset-I
+<166>Sep 21 14:08:30 asa-core-fw %ASA-6-302015: Built inbound UDP connection 1005144 for outside:198.51.100.50/500 (198.51.100.50/500) to inside:10.1.1.196/47096 (198.51.100.226/47096)
+<166>Sep 21 14:08:30 asa-dc-01 %ASA-6-302016: Teardown UDP connection 1004544 for outside:203.0.113.98/5060 to inside:10.1.18.52/15421 duration 0:00:03 bytes 4451
+<164>Sep 21 14:08:32 asa-edge-01 %ASA-4-106023: Deny tcp src outside:203.0.113.237/49887 dst inside:10.1.8.116/993 by access-group "outside_access_in" [0xddfd9531, 0x0]
+<162>Sep 21 14:08:36 asa-core-fw %ASA-2-106001: Inbound TCP connection denied from 198.51.100.94/30109 to 10.1.2.9/80 flags SYN+ACK on interface outside
+<164>Sep 21 14:08:38 asa-edge-01 %ASA-4-113019: Group = RemoteAccess-Corp, Username = tpatel, IP = 203.0.113.54, Session disconnected. Session Type: SSL, Duration: 1h:36m:20s, Bytes xmt: 19005781, Bytes rcv: 12782888, Reason: Connection Lost
+<166>Sep 21 14:08:40 asa-dc-01 %ASA-6-302013: Built inbound TCP connection 1004719 for outside:198.51.100.95/25 (198.51.100.95/25) to inside:10.1.8.131/43847 (198.51.100.229/43847)

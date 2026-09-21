@@ -1,0 +1,22 @@
+services:
+  ulpf-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ulpf-engine
+    ports:
+      - "5140:5140/udp"
+      - "5140:5140/tcp"
+    volumes:
+      - ./data/parquet:/opt/ulpf/data/parquet
+      - ./data/ledger.jsonl:/opt/ulpf/data/ledger.jsonl
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    # Strictly air-gapped configuration: no outbound internet required
+    networks:
+      - ulpf-net
+
+networks:
+  ulpf-net:
+    driver: bridge
