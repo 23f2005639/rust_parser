@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use chrono::Utc;
+use std::collections::HashMap;
 
+use super::{parse_date_time_or_fallback, protocol_name_from_num, protocol_num_from_name};
 use crate::schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product, Traffic,
 };
-use super::{parse_date_time_or_fallback, protocol_name_from_num, protocol_num_from_name};
 
 /// Fast zero-copy iterator over key-value pairs in a Fortinet / Syslog log line.
 pub struct KvTokenizer<'a> {
@@ -21,58 +21,55 @@ impl<'a> Iterator for KvTokenizer<'a> {
     type Item = (&'a str, &'a str);
 
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            self.s = self.s.trim_start();
-            if self.s.is_empty() {
-                return None;
+        self.s = self.s.trim_start();
+        if self.s.is_empty() {
+            return None;
+        }
+
+        let eq_pos = self.s.find('=')?;
+        let raw_key = &self.s[..eq_pos];
+        // Extract the word immediately preceding the '='
+        let key = if let Some(space_pos) = raw_key.rfind(|c: char| c.is_whitespace()) {
+            &raw_key[space_pos + 1..]
+        } else {
+            raw_key
+        };
+        let key = key.trim_start_matches(|c: char| !c.is_alphanumeric() && c != '_');
+
+        let after_eq = &self.s[eq_pos + 1..];
+        if let Some(inner) = after_eq.strip_prefix('"') {
+            // Quoted value
+            let mut end_pos = None;
+            let mut escaped = false;
+            for (idx, b) in inner.bytes().enumerate() {
+                if escaped {
+                    escaped = false;
+                } else if b == b'\\' {
+                    escaped = true;
+                } else if b == b'"' {
+                    end_pos = Some(idx);
+                    break;
+                }
             }
 
-            let eq_pos = self.s.find('=')?;
-            let raw_key = &self.s[..eq_pos];
-            // Extract the word immediately preceding the '='
-            let key = if let Some(space_pos) = raw_key.rfind(|c: char| c.is_whitespace()) {
-                &raw_key[space_pos + 1..]
+            if let Some(close_idx) = end_pos {
+                let val = &inner[..close_idx];
+                self.s = &inner[close_idx + 1..];
+                Some((key, val))
             } else {
-                raw_key
+                let val = inner;
+                self.s = "";
+                Some((key, val))
+            }
+        } else {
+            // Unquoted value: ends at whitespace
+            let ws_pos = after_eq.find(|c: char| c.is_whitespace());
+            let (val, rest) = match ws_pos {
+                Some(idx) => (&after_eq[..idx], &after_eq[idx..]),
+                None => (after_eq, ""),
             };
-            let key = key.trim_start_matches(|c: char| !c.is_alphanumeric() && c != '_');
-
-            let after_eq = &self.s[eq_pos + 1..];
-            if after_eq.starts_with('"') {
-                // Quoted value
-                let inner = &after_eq[1..];
-                let mut end_pos = None;
-                let mut escaped = false;
-                for (idx, b) in inner.bytes().enumerate() {
-                    if escaped {
-                        escaped = false;
-                    } else if b == b'\\' {
-                        escaped = true;
-                    } else if b == b'"' {
-                        end_pos = Some(idx);
-                        break;
-                    }
-                }
-
-                if let Some(close_idx) = end_pos {
-                    let val = &inner[..close_idx];
-                    self.s = &inner[close_idx + 1..];
-                    return Some((key, val));
-                } else {
-                    let val = inner;
-                    self.s = "";
-                    return Some((key, val));
-                }
-            } else {
-                // Unquoted value: ends at whitespace
-                let ws_pos = after_eq.find(|c: char| c.is_whitespace());
-                let (val, rest) = match ws_pos {
-                    Some(idx) => (&after_eq[..idx], &after_eq[idx..]),
-                    None => (after_eq, ""),
-                };
-                self.s = rest;
-                return Some((key, val));
-            }
+            self.s = rest;
+            Some((key, val))
         }
     }
 }
@@ -188,7 +185,8 @@ impl FortigateExtractor {
             connection_info,
             traffic,
             metadata,
-        ).with_unmapped(unmapped))
+        )
+        .with_unmapped(unmapped))
     }
 }
 

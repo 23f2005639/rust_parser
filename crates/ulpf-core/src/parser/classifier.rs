@@ -105,15 +105,24 @@ impl Classifier {
         if trimmed.contains("filterlog") {
             return VendorFormat::PfSense;
         }
-        if (trimmed.starts_with('{') || trimmed.contains("{\"")) && (trimmed.contains("\"timestamp\"") || trimmed.contains("\"event_type\"")) {
+        if (trimmed.starts_with('{') || trimmed.contains("{\""))
+            && (trimmed.contains("\"timestamp\"") || trimmed.contains("\"event_type\""))
+        {
             return VendorFormat::Suricata;
         }
-        if (trimmed.contains("srcip=") || trimmed.contains("dstip=")) && trimmed.contains("proto=") {
+        if (trimmed.contains("srcip=") || trimmed.contains("dstip=")) && trimmed.contains("proto=")
+        {
             return VendorFormat::Fortinet;
         }
         // Palo Alto PAN-OS CSV heuristic: typically has 20+ comma-separated tokens
         let comma_count = trimmed.bytes().filter(|&b| b == b',').count();
-        if comma_count >= 15 && (trimmed.contains("TRAFFIC") || trimmed.contains("THREAT") || trimmed.contains("allow") || trimmed.contains("deny") || trimmed.contains("drop")) {
+        if comma_count >= 15
+            && (trimmed.contains("TRAFFIC")
+                || trimmed.contains("THREAT")
+                || trimmed.contains("allow")
+                || trimmed.contains("deny")
+                || trimmed.contains("drop"))
+        {
             return VendorFormat::PaloAlto;
         }
 
@@ -140,7 +149,9 @@ mod tests {
             VendorFormat::CiscoAsa
         );
         assert_eq!(
-            classifier.classify("date=2023-10-15 time=10:20:30 devname=\"FGT60D\" type=\"traffic\" srcip=1.1.1.1"),
+            classifier.classify(
+                "date=2023-10-15 time=10:20:30 devname=\"FGT60D\" type=\"traffic\" srcip=1.1.1.1"
+            ),
             VendorFormat::Fortinet
         );
         assert_eq!(
@@ -152,7 +163,9 @@ mod tests {
             VendorFormat::Suricata
         );
         assert_eq!(
-            classifier.classify("Oct 15 10:20:30 pfSense filterlog[12345]: 5,,,1000000103,em0,match,pass,in,4"),
+            classifier.classify(
+                "Oct 15 10:20:30 pfSense filterlog[12345]: 5,,,1000000103,em0,match,pass,in,4"
+            ),
             VendorFormat::PfSense
         );
         assert_eq!(

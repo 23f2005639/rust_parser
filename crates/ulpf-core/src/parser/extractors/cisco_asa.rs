@@ -1,12 +1,12 @@
-use std::collections::HashMap;
 use chrono::Utc;
 use regex::Regex;
+use std::collections::HashMap;
 use std::sync::OnceLock;
 
+use super::protocol_num_from_name;
 use crate::schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product, Traffic,
 };
-use super::protocol_num_from_name;
 
 static REGEX_ASA_HEADER: OnceLock<Regex> = OnceLock::new();
 static REGEX_BUILT: OnceLock<Regex> = OnceLock::new();
@@ -44,11 +44,13 @@ impl CiscoAsaExtractor {
 
     pub fn parse(&self, raw: &str) -> anyhow::Result<NetworkActivity> {
         let header_re = REGEX_ASA_HEADER.get().unwrap();
-        let captures = header_re
-            .captures(raw)
-            .ok_or_else(|| anyhow::anyhow!("Raw log does not contain valid %ASA- header: {}", raw))?;
+        let captures = header_re.captures(raw).ok_or_else(|| {
+            anyhow::anyhow!("Raw log does not contain valid %ASA- header: {}", raw)
+        })?;
 
-        let severity: u8 = captures.get(1).map_or(6, |m| m.as_str().parse().unwrap_or(6));
+        let severity: u8 = captures
+            .get(1)
+            .map_or(6, |m| m.as_str().parse().unwrap_or(6));
         let message_code = captures.get(2).map_or("", |m| m.as_str());
         let body = captures.get(3).map_or("", |m| m.as_str());
 
@@ -80,7 +82,8 @@ impl CiscoAsaExtractor {
 
                     let src_endpoint = Endpoint::new(src_ip, src_port, src_intf, None);
                     let dst_endpoint = Endpoint::new(dst_ip, dst_port, dst_intf, None);
-                    let connection_info = ConnectionInfo::new(proto_num, Some(proto_name), Some(direction));
+                    let connection_info =
+                        ConnectionInfo::new(proto_num, Some(proto_name), Some(direction));
 
                     let product = Product::new("Cisco", "ASA", None);
                     let metadata = Metadata::new(product, raw, "", "", now_ms);
@@ -94,7 +97,8 @@ impl CiscoAsaExtractor {
                         connection_info,
                         None,
                         metadata,
-                    ).with_unmapped(unmapped))
+                    )
+                    .with_unmapped(unmapped))
                 } else {
                     self.fallback_parse(raw, message_code, body, now_ms, unmapped)
                 }
@@ -140,7 +144,8 @@ impl CiscoAsaExtractor {
                         connection_info,
                         traffic,
                         metadata,
-                    ).with_unmapped(unmapped))
+                    )
+                    .with_unmapped(unmapped))
                 } else {
                     self.fallback_parse(raw, message_code, body, now_ms, unmapped)
                 }
@@ -181,7 +186,8 @@ impl CiscoAsaExtractor {
                         connection_info,
                         None,
                         metadata,
-                    ).with_unmapped(unmapped))
+                    )
+                    .with_unmapped(unmapped))
                 } else {
                     self.fallback_parse(raw, message_code, body, now_ms, unmapped)
                 }
@@ -206,7 +212,8 @@ impl CiscoAsaExtractor {
 
                     let src_endpoint = Endpoint::new(src_ip, src_port, src_intf, None);
                     let dst_endpoint = Endpoint::new(dst_ip, dst_port, dst_intf, None);
-                    let connection_info = ConnectionInfo::new(proto_num, Some(proto_name), Some(direction));
+                    let connection_info =
+                        ConnectionInfo::new(proto_num, Some(proto_name), Some(direction));
 
                     let product = Product::new("Cisco", "ASA", None);
                     let metadata = Metadata::new(product, raw, "", "", now_ms);
@@ -220,7 +227,8 @@ impl CiscoAsaExtractor {
                         connection_info,
                         None,
                         metadata,
-                    ).with_unmapped(unmapped))
+                    )
+                    .with_unmapped(unmapped))
                 } else {
                     self.fallback_parse(raw, message_code, body, now_ms, unmapped)
                 }
@@ -239,9 +247,7 @@ impl CiscoAsaExtractor {
         now_ms: i64,
         unmapped: HashMap<String, String>,
     ) -> anyhow::Result<NetworkActivity> {
-        let disp = if body.contains("Built") {
-            disposition::ALLOWED
-        } else if body.contains("Teardown") {
+        let disp = if body.contains("Built") || body.contains("Teardown") {
             disposition::ALLOWED
         } else if body.contains("Deny") || body.contains("denied") {
             disposition::BLOCKED
@@ -271,7 +277,8 @@ impl CiscoAsaExtractor {
             ConnectionInfo::default(),
             None,
             metadata,
-        ).with_unmapped(unmapped))
+        )
+        .with_unmapped(unmapped))
     }
 }
 
@@ -294,7 +301,9 @@ fn parse_endpoint_str(
     text: &str,
     default_intf: Option<&str>,
 ) -> (Option<String>, Option<u16>, Option<String>) {
-    let clean = text.trim().trim_matches(|c: char| c == '(' || c == ')' || c == '[' || c == ']');
+    let clean = text
+        .trim()
+        .trim_matches(|c: char| c == '(' || c == ')' || c == '[' || c == ']');
     let (intf, rest) = if let Some(colon_pos) = clean.find(':') {
         let (i, r) = clean.split_at(colon_pos);
         (Some(i.to_string()), &r[1..])

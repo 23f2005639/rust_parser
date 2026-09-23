@@ -61,7 +61,10 @@ impl FromStr for Protocol {
         match s.to_lowercase().as_str() {
             "udp" => Ok(Protocol::Udp),
             "tcp" => Ok(Protocol::Tcp),
-            _ => Err(anyhow::anyhow!("Invalid protocol '{}'. Must be 'udp' or 'tcp'", s)),
+            _ => Err(anyhow::anyhow!(
+                "Invalid protocol '{}'. Must be 'udp' or 'tcp'",
+                s
+            )),
         }
     }
 }
@@ -158,7 +161,11 @@ pub fn load_dataset(kind: DatasetKind, data_dir: &Path) -> Result<Vec<String>> {
     let load_cisco = |logs: &mut Vec<String>| -> Result<()> {
         let p = data_dir.join("cisco_asa.log");
         let lines = read_lines(&p)?;
-        println!("  [+] Loaded {} Cisco ASA records from {:?}", lines.len(), p);
+        println!(
+            "  [+] Loaded {} Cisco ASA records from {:?}",
+            lines.len(),
+            p
+        );
         logs.extend(lines);
         Ok(())
     };
@@ -166,7 +173,11 @@ pub fn load_dataset(kind: DatasetKind, data_dir: &Path) -> Result<Vec<String>> {
     let load_fortigate = |logs: &mut Vec<String>| -> Result<()> {
         let p = data_dir.join("fortigate.log");
         let lines = read_lines(&p)?;
-        println!("  [+] Loaded {} FortiGate records from {:?}", lines.len(), p);
+        println!(
+            "  [+] Loaded {} FortiGate records from {:?}",
+            lines.len(),
+            p
+        );
         logs.extend(lines);
         Ok(())
     };
@@ -174,7 +185,11 @@ pub fn load_dataset(kind: DatasetKind, data_dir: &Path) -> Result<Vec<String>> {
     let load_paloalto = |logs: &mut Vec<String>| -> Result<()> {
         let p = data_dir.join("paloalto.log");
         let lines = read_lines(&p)?;
-        println!("  [+] Loaded {} Palo Alto records from {:?}", lines.len(), p);
+        println!(
+            "  [+] Loaded {} Palo Alto records from {:?}",
+            lines.len(),
+            p
+        );
         logs.extend(lines);
         Ok(())
     };
@@ -205,7 +220,10 @@ pub fn load_dataset(kind: DatasetKind, data_dir: &Path) -> Result<Vec<String>> {
                 count += 1;
             }
         }
-        println!("  [+] Loaded & converted {} Kaggle Firewall records into Syslog from {:?}", count, p);
+        println!(
+            "  [+] Loaded & converted {} Kaggle Firewall records into Syslog from {:?}",
+            count, p
+        );
         Ok(())
     };
 
@@ -227,7 +245,10 @@ pub fn load_dataset(kind: DatasetKind, data_dir: &Path) -> Result<Vec<String>> {
     }
 
     if logs.is_empty() {
-        return Err(anyhow::anyhow!("No logs loaded for dataset kind '{}'", kind));
+        return Err(anyhow::anyhow!(
+            "No logs loaded for dataset kind '{}'",
+            kind
+        ));
     }
 
     Ok(logs)
@@ -258,10 +279,25 @@ mod tests {
     fn test_dataset_kind_parsing() {
         assert_eq!("all".parse::<DatasetKind>().unwrap(), DatasetKind::All);
         assert_eq!("cisco".parse::<DatasetKind>().unwrap(), DatasetKind::Cisco);
-        assert_eq!("fortigate".parse::<DatasetKind>().unwrap(), DatasetKind::Fortigate);
-        assert_eq!("paloalto".parse::<DatasetKind>().unwrap(), DatasetKind::PaloAlto);
-        assert_eq!("suricata".parse::<DatasetKind>().unwrap(), DatasetKind::Suricata);
-        assert_eq!("pfsense".parse::<DatasetKind>().unwrap(), DatasetKind::PfSense);
-        assert_eq!("kaggle".parse::<DatasetKind>().unwrap(), DatasetKind::Kaggle);
+        assert_eq!(
+            "fortigate".parse::<DatasetKind>().unwrap(),
+            DatasetKind::Fortigate
+        );
+        assert_eq!(
+            "paloalto".parse::<DatasetKind>().unwrap(),
+            DatasetKind::PaloAlto
+        );
+        assert_eq!(
+            "suricata".parse::<DatasetKind>().unwrap(),
+            DatasetKind::Suricata
+        );
+        assert_eq!(
+            "pfsense".parse::<DatasetKind>().unwrap(),
+            DatasetKind::PfSense
+        );
+        assert_eq!(
+            "kaggle".parse::<DatasetKind>().unwrap(),
+            DatasetKind::Kaggle
+        );
     }
 }

@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpStream, UdpSocket};
 
-use ulpf_generator::{locate_data_dir, load_dataset, DatasetKind, Protocol};
+use ulpf_generator::{load_dataset, locate_data_dir, DatasetKind, Protocol};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -81,7 +81,10 @@ async fn main() -> Result<()> {
     if cli.rate == 0 {
         println!("  Target Rate: UNTHROTTLED (MAX EPS)");
     } else {
-        println!("  Target Rate: {} EPS ({} pkts/sec across {} workers)", cli.rate, cli.rate, num_workers);
+        println!(
+            "  Target Rate: {} EPS ({} pkts/sec across {} workers)",
+            cli.rate, cli.rate, num_workers
+        );
     }
     if cli.duration == 0 {
         println!("  Duration:    Infinite (Press Ctrl+C to stop)");
@@ -256,7 +259,11 @@ async fn main() -> Result<()> {
     println!("  Dataset:           {}", dataset_kind);
     println!("  Elapsed Time:      {:.2} seconds", elapsed);
     println!("  Total Packets:     {} pkts", total_pkts);
-    println!("  Total Data Sent:   {:.2} MB ({} bytes)", (total_bytes as f64) / (1024.0 * 1024.0), total_bytes);
+    println!(
+        "  Total Data Sent:   {:.2} MB ({} bytes)",
+        (total_bytes as f64) / (1024.0 * 1024.0),
+        total_bytes
+    );
     println!("  Average Rate:      {} pkts/sec (EPS)", avg_eps);
     println!("  Average Bandwidth: {:.2} MB/sec", avg_mb_sec);
     println!("  Total Errors:      {}", total_errors);
@@ -284,7 +291,10 @@ async fn run_udp_worker(
     };
 
     if let Err(e) = socket.connect(target).await {
-        eprintln!("[Worker {}] Failed to connect UDP socket to {}: {}", worker_id, target, e);
+        eprintln!(
+            "[Worker {}] Failed to connect UDP socket to {}: {}",
+            worker_id, target, e
+        );
         stats.errors.fetch_add(1, Ordering::Relaxed);
         return;
     }
@@ -349,7 +359,10 @@ async fn run_tcp_worker(
     let mut stream = match TcpStream::connect(target).await {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("[Worker {}] Failed to connect TCP to {}: {}", worker_id, target, e);
+            eprintln!(
+                "[Worker {}] Failed to connect TCP to {}: {}",
+                worker_id, target, e
+            );
             stats.errors.fetch_add(1, Ordering::Relaxed);
             return;
         }
@@ -384,12 +397,19 @@ async fn run_tcp_worker(
         match stream.write_all(&send_buf).await {
             Ok(_) => {
                 sent_count += to_send as u64;
-                stats.packets_sent.fetch_add(to_send as u64, Ordering::Relaxed);
-                stats.bytes_sent.fetch_add(send_buf.len() as u64, Ordering::Relaxed);
+                stats
+                    .packets_sent
+                    .fetch_add(to_send as u64, Ordering::Relaxed);
+                stats
+                    .bytes_sent
+                    .fetch_add(send_buf.len() as u64, Ordering::Relaxed);
             }
             Err(e) => {
                 stats.errors.fetch_add(1, Ordering::Relaxed);
-                eprintln!("[Worker {}] TCP write error: {}. Reconnecting...", worker_id, e);
+                eprintln!(
+                    "[Worker {}] TCP write error: {}. Reconnecting...",
+                    worker_id, e
+                );
                 tokio::time::sleep(Duration::from_millis(500)).await;
                 if let Ok(new_stream) = TcpStream::connect(target).await {
                     stream = new_stream;

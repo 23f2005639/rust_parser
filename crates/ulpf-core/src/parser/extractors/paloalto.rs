@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use chrono::Utc;
+use std::collections::HashMap;
 
+use super::{parse_palo_alto_time_or_fallback, protocol_num_from_name, split_csv};
 use crate::schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product, Traffic,
 };
-use super::{parse_palo_alto_time_or_fallback, protocol_num_from_name, split_csv};
 
 pub struct PaloAltoExtractor;
 
@@ -26,7 +26,10 @@ impl PaloAltoExtractor {
         }
 
         // Locate the base offset using the TRAFFIC type token
-        let traffic_idx = fields.iter().position(|&f| f.eq_ignore_ascii_case("TRAFFIC")).unwrap_or(3);
+        let traffic_idx = fields
+            .iter()
+            .position(|&f| f.eq_ignore_ascii_case("TRAFFIC"))
+            .unwrap_or(3);
         let base = traffic_idx as isize - 3;
 
         let get = |idx: isize| -> Option<&str> {
@@ -136,7 +139,8 @@ impl PaloAltoExtractor {
             connection_info,
             traffic,
             metadata,
-        ).with_unmapped(unmapped))
+        )
+        .with_unmapped(unmapped))
     }
 }
 

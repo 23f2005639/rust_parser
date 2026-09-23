@@ -1,8 +1,8 @@
+use socket2::{Domain, Protocol, Socket, Type};
 use std::io;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use socket2::{Domain, Protocol, Socket, Type};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::{TcpListener, UdpSocket};
 use tokio::sync::mpsc;
@@ -99,10 +99,7 @@ impl UdpSyslogListener {
     }
 
     /// Run the UDP packet receiver and forward batches of raw string lines to a channel
-    pub async fn run_raw(
-        self,
-        tx: mpsc::Sender<Vec<String>>,
-    ) -> anyhow::Result<()> {
+    pub async fn run_raw(self, tx: mpsc::Sender<Vec<String>>) -> anyhow::Result<()> {
         let mut buf = vec![0u8; self.config.buffer_capacity];
         let mut current_batch = Vec::with_capacity(self.config.batch_size);
         let mut last_flush = tokio::time::Instant::now();
@@ -196,10 +193,7 @@ impl TcpSyslogListener {
     }
 
     /// Run TCP connection acceptor, spawning connection reader tasks
-    pub async fn run_raw(
-        self,
-        tx: mpsc::Sender<Vec<String>>,
-    ) -> anyhow::Result<()> {
+    pub async fn run_raw(self, tx: mpsc::Sender<Vec<String>>) -> anyhow::Result<()> {
         let batch_size = self.config.batch_size;
         let batch_timeout = self.config.batch_timeout;
 
@@ -217,8 +211,13 @@ impl TcpSyslogListener {
                             let trimmed = line.trim();
                             if !trimmed.is_empty() {
                                 batch.push(trimmed.to_string());
-                                if batch.len() >= batch_size || last_flush.elapsed() >= batch_timeout {
-                                    let to_send = std::mem::replace(&mut batch, Vec::with_capacity(batch_size));
+                                if batch.len() >= batch_size
+                                    || last_flush.elapsed() >= batch_timeout
+                                {
+                                    let to_send = std::mem::replace(
+                                        &mut batch,
+                                        Vec::with_capacity(batch_size),
+                                    );
                                     if tx_conn.send(to_send).await.is_err() {
                                         break;
                                     }
@@ -301,7 +300,10 @@ mod tests {
         // Send test UDP packet
         let sender = tokio::net::UdpSocket::bind("127.0.0.1:0").await.unwrap();
         let log_line = "%ASA-6-302013: Built inbound UDP connection 123 for outside:1.1.1.1/53 to inside:2.2.2.2/53\n";
-        sender.send_to(log_line.as_bytes(), actual_addr).await.unwrap();
+        sender
+            .send_to(log_line.as_bytes(), actual_addr)
+            .await
+            .unwrap();
 
         let received = tokio::time::timeout(Duration::from_millis(500), rx.recv()).await;
         assert!(received.is_ok(), "Should receive batch within timeout");

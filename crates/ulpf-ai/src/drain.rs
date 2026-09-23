@@ -1,9 +1,9 @@
-use std::collections::{HashMap, VecDeque};
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::Instant;
 use chrono::Utc;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, VecDeque};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Instant;
 
 /// Drain3 Configuration Options
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22,6 +22,9 @@ pub struct DrainConfig {
     pub surge_multiplier: f64,
     /// Rolling window sample size for anomaly rate calculation (default: 100)
     pub window_size: usize,
+    /// Unique event anchor tokens that must NEVER be merged into a wildcard `<*>`
+    /// If an anchor token differs between two logs, a distinct cluster is forced (DrainDotNet innovation)
+    pub unique_anchor_tokens: Vec<String>,
 }
 
 impl Default for DrainConfig {
@@ -34,6 +37,15 @@ impl Default for DrainConfig {
             rare_count_threshold: 5,
             surge_multiplier: 3.0,
             window_size: 100,
+            unique_anchor_tokens: vec![
+                "ALLOW".into(),
+                "DENY".into(),
+                "DROP".into(),
+                "BLOCK".into(),
+                "PERMIT".into(),
+                "REJECT".into(),
+                "PASS".into(),
+            ],
         }
     }
 }
@@ -241,7 +253,9 @@ impl DrainMiner {
                 && cluster.count > self.config.rare_count_threshold
             {
                 let rate = cluster.recent_rate_per_sec();
-                if rate >= self.config.surge_multiplier || cluster.count >= self.config.rare_count_threshold + 2 {
+                if rate >= self.config.surge_multiplier
+                    || cluster.count >= self.config.rare_count_threshold + 2
+                {
                     anomaly = Some(AnomalyAlert {
                         anomaly_type: AnomalyType::RareClusterSurge,
                         cluster_id,
@@ -299,7 +313,10 @@ impl DrainMiner {
         if input.contains(' ') {
             input
                 .split_whitespace()
-                .map(|s| s.trim_matches(|c| c == ',' || c == ';' || c == '"' || c == '\'').to_string())
+                .map(|s| {
+                    s.trim_matches(|c| c == ',' || c == ';' || c == '"' || c == '\'')
+                        .to_string()
+                })
                 .filter(|s| !s.is_empty())
                 .collect()
         } else if input.contains(',') {
@@ -356,7 +373,11 @@ impl DrainMiner {
                 if cluster.size != token_count {
                     continue;
                 }
-                let sim = Self::compute_similarity(&cluster.template_tokens, tokens);
+                let sim = Self::compute_similarity(
+                    &cluster.template_tokens,
+                    tokens,
+                    &self.config.unique_anchor_tokens,
+                );
                 if sim > max_sim {
                     max_sim = sim;
                     if sim >= self.config.similarity_threshold {
@@ -405,11 +426,30 @@ impl DrainMiner {
 
     /// Compute Drain similarity between cluster template and incoming tokens:
     /// sim = count(matching or wildcard tokens) / total_tokens
+    /// Enforces DrainDotNet UniqueEventPatterns: anchor tokens (e.g. ALLOW vs DENY) cannot be merged!
     #[inline]
-    fn compute_similarity(tmpl_tokens: &[String], in_tokens: &[String]) -> f64 {
+    fn compute_similarity(
+        tmpl_tokens: &[String],
+        in_tokens: &[String],
+        anchor_tokens: &[String],
+    ) -> f64 {
         if tmpl_tokens.len() != in_tokens.len() || tmpl_tokens.is_empty() {
             return 0.0;
         }
+
+        if !anchor_tokens.is_empty() {
+            for (t1, t2) in tmpl_tokens.iter().zip(in_tokens.iter()) {
+                let t1_upper = t1.to_ascii_uppercase();
+                let t2_upper = t2.to_ascii_uppercase();
+                let is_anchor = anchor_tokens
+                    .iter()
+                    .any(|a| a == &t1_upper || a == &t2_upper);
+                if is_anchor && t1_upper != t2_upper {
+                    return 0.0; // Force distinct template cluster
+                }
+            }
+        }
+
         let mut matches = 0;
         for (t1, t2) in tmpl_tokens.iter().zip(in_tokens.iter()) {
             if t1 == "<*>" || t1 == t2 {
@@ -438,7 +478,7 @@ impl DrainMiner {
     /// Returns a list of all mined clusters sorted by frequency descending
     pub fn all_clusters_by_frequency(&self) -> Vec<&LogCluster> {
         let mut list: Vec<&LogCluster> = self.clusters.values().collect();
-        list.sort_by(|a, b| b.count.cmp(&a.count));
+        list.sort_by_key(|a| std::cmp::Reverse(a.count));
         list
     }
 
@@ -503,7 +543,8 @@ impl LogMasker {
         let mut saved_tags = Vec::new();
         if has_percent {
             let mut placeholder_idx = 0;
-            s = self.re_syslog_tag
+            s = self
+                .re_syslog_tag
                 .replace_all(&s, |caps: &regex::Captures| {
                     let tag = caps.get(0).unwrap().as_str().to_string();
                     let placeholder = format!("__SYSLOG_TAG_{}__", placeholder_idx);

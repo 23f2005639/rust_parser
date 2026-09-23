@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-use std::net::Ipv4Addr;
-use std::str::FromStr;
-use std::sync::Arc;
 use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::collections::HashMap;
+use std::net::Ipv4Addr;
+use std::str::FromStr;
+use std::sync::Arc;
 use uuid::Uuid;
 
 use ulpf_core::schema::ocsf::{
@@ -53,7 +53,12 @@ impl ParserDefinition {
         yaml.push_str(&format!("device_model: \"{}\"\n", self.device_model));
         yaml.push_str(&format!("confidence_score: {:.2}\n", self.confidence_score));
         yaml.push_str(&format!("created_at: {}\n", self.created_at));
-        yaml.push_str(&format!("regex_pattern: \"{}\"\n", self.regex_pattern.replace('\\', "\\\\").replace('"', "\\\"")));
+        yaml.push_str(&format!(
+            "regex_pattern: \"{}\"\n",
+            self.regex_pattern
+                .replace('\\', "\\\\")
+                .replace('"', "\\\"")
+        ));
         yaml.push_str("action_mappings:\n");
         for (k, v) in &self.action_mappings {
             yaml.push_str(&format!("  {}: \"{}\"\n", k, v));
@@ -128,7 +133,11 @@ impl ParserDefinition {
                     "vendor" => vendor = val.to_string(),
                     "device_model" => device_model = val.to_string(),
                     "confidence_score" => confidence_score = val.parse().unwrap_or(1.0),
-                    "created_at" => created_at = val.parse().unwrap_or_else(|_| Utc::now().timestamp_millis()),
+                    "created_at" => {
+                        created_at = val
+                            .parse()
+                            .unwrap_or_else(|_| Utc::now().timestamp_millis())
+                    }
                     "regex_pattern" => {
                         regex_pattern = val.replace("\\\\", "\\").to_string();
                     }
@@ -154,11 +163,19 @@ impl ParserDefinition {
 
     /// Dynamically compile and parse an incoming raw log line into normalized OCSF 1.3 NetworkActivity
     pub fn parse(&self, raw: &str) -> Result<NetworkActivity> {
-        let compiled_re = Regex::new(&self.regex_pattern)
-            .with_context(|| format!("Invalid compiled regex in parser definition: {}", self.regex_pattern))?;
+        let compiled_re = Regex::new(&self.regex_pattern).with_context(|| {
+            format!(
+                "Invalid compiled regex in parser definition: {}",
+                self.regex_pattern
+            )
+        })?;
 
         let caps = compiled_re.captures(raw).ok_or_else(|| {
-            anyhow!("Log did not match dynamic parser pattern for vendor '{}': {}", self.vendor, raw)
+            anyhow!(
+                "Log did not match dynamic parser pattern for vendor '{}': {}",
+                self.vendor,
+                raw
+            )
         })?;
 
         let now_ms = Utc::now().timestamp_millis();
@@ -211,8 +228,12 @@ impl ParserDefinition {
             .get(&raw_action)
             .cloned()
             .unwrap_or_else(|| match raw_action.as_str() {
-                "accept" | "permit" | "allow" | "created" | "passed" | "pass" => disposition::ALLOWED.to_string(),
-                "deny" | "block" | "reject" | "denied" | "blocked" => disposition::BLOCKED.to_string(),
+                "accept" | "permit" | "allow" | "created" | "passed" | "pass" => {
+                    disposition::ALLOWED.to_string()
+                }
+                "deny" | "block" | "reject" | "denied" | "blocked" => {
+                    disposition::BLOCKED.to_string()
+                }
                 "drop" | "dropped" => disposition::DROPPED.to_string(),
                 "closed" | "close" | "teardown" => disposition::ALLOWED.to_string(),
                 _ => disposition::UNKNOWN.to_string(),
@@ -242,7 +263,16 @@ impl ParserDefinition {
         for name in compiled_re.capture_names().flatten() {
             if !matches!(
                 name,
-                "src_ip" | "src_port" | "dst_ip" | "dst_port" | "protocol" | "action" | "action_verb" | "interface" | "src_zone" | "dst_zone"
+                "src_ip"
+                    | "src_port"
+                    | "dst_ip"
+                    | "dst_port"
+                    | "protocol"
+                    | "action"
+                    | "action_verb"
+                    | "interface"
+                    | "src_zone"
+                    | "dst_zone"
             ) {
                 if let Some(m) = caps.name(name) {
                     unmapped.insert(name.to_string(), m.as_str().to_string());
@@ -385,7 +415,10 @@ impl Onboarder {
     }
 
     /// Automated Sandbox Validation: verifies 100% of samples match and extract valid IPs and ports
-    pub fn validate_parser(parser: &ParserDefinition, samples: &[&str]) -> Result<ValidationReport> {
+    pub fn validate_parser(
+        parser: &ParserDefinition,
+        samples: &[&str],
+    ) -> Result<ValidationReport> {
         let compiled_re = Regex::new(&parser.regex_pattern)
             .with_context(|| format!("Failed to compile regex: {}", parser.regex_pattern))?;
 
@@ -401,7 +434,11 @@ impl Onboarder {
             let caps = match compiled_re.captures(line) {
                 Some(c) => c,
                 None => {
-                    errors.push(format!("Sample #{} did not match regex pattern: '{}'", idx + 1, line));
+                    errors.push(format!(
+                        "Sample #{} did not match regex pattern: '{}'",
+                        idx + 1,
+                        line
+                    ));
                     continue;
                 }
             };
@@ -411,12 +448,19 @@ impl Onboarder {
             match src_ip_opt {
                 Some(ip_str) => {
                     if Ipv4Addr::from_str(ip_str).is_err() {
-                        errors.push(format!("Sample #{}: invalid IPv4 for src_ip: '{}'", idx + 1, ip_str));
+                        errors.push(format!(
+                            "Sample #{}: invalid IPv4 for src_ip: '{}'",
+                            idx + 1,
+                            ip_str
+                        ));
                         continue;
                     }
                 }
                 None => {
-                    errors.push(format!("Sample #{}: missing required capture group 'src_ip'", idx + 1));
+                    errors.push(format!(
+                        "Sample #{}: missing required capture group 'src_ip'",
+                        idx + 1
+                    ));
                     continue;
                 }
             }
@@ -426,12 +470,19 @@ impl Onboarder {
             match dst_ip_opt {
                 Some(ip_str) => {
                     if Ipv4Addr::from_str(ip_str).is_err() {
-                        errors.push(format!("Sample #{}: invalid IPv4 for dst_ip: '{}'", idx + 1, ip_str));
+                        errors.push(format!(
+                            "Sample #{}: invalid IPv4 for dst_ip: '{}'",
+                            idx + 1,
+                            ip_str
+                        ));
                         continue;
                     }
                 }
                 None => {
-                    errors.push(format!("Sample #{}: missing required capture group 'dst_ip'", idx + 1));
+                    errors.push(format!(
+                        "Sample #{}: missing required capture group 'dst_ip'",
+                        idx + 1
+                    ));
                     continue;
                 }
             }
@@ -439,14 +490,22 @@ impl Onboarder {
             // Validate ports if present
             if let Some(sp) = caps.name("src_port") {
                 if sp.as_str().parse::<u16>().is_err() {
-                    errors.push(format!("Sample #{}: invalid port for src_port: '{}'", idx + 1, sp.as_str()));
+                    errors.push(format!(
+                        "Sample #{}: invalid port for src_port: '{}'",
+                        idx + 1,
+                        sp.as_str()
+                    ));
                     continue;
                 }
             }
 
             if let Some(dp) = caps.name("dst_port") {
                 if dp.as_str().parse::<u16>().is_err() {
-                    errors.push(format!("Sample #{}: invalid port for dst_port: '{}'", idx + 1, dp.as_str()));
+                    errors.push(format!(
+                        "Sample #{}: invalid port for dst_port: '{}'",
+                        idx + 1,
+                        dp.as_str()
+                    ));
                     continue;
                 }
             }
@@ -477,7 +536,10 @@ impl Onboarder {
         let first = samples[0];
 
         // Case 1: Check for Juniper SRX / Directional Flow format: `IP/PORT->IP/PORT` or `IP:PORT -> IP:PORT`
-        if first.contains("->") || first.contains("session created") || first.contains("session denied") {
+        if first.contains("->")
+            || first.contains("session created")
+            || first.contains("session denied")
+        {
             return Self::synthesize_flow_regex(samples);
         }
 
@@ -492,13 +554,14 @@ impl Onboarder {
 
     /// Synthesize regex for directional arrow flow formats (e.g. Juniper SRX `IP/PORT->IP/PORT`)
     fn synthesize_flow_regex(samples: &[&str]) -> Result<String> {
-        let re_flow_slash = Regex::new(
-            r"((?:\d{1,3}\.){3}\d{1,3})/(\d{1,5})->((?:\d{1,3}\.){3}\d{1,3})/(\d{1,5})"
-        ).unwrap();
+        let re_flow_slash =
+            Regex::new(r"((?:\d{1,3}\.){3}\d{1,3})/(\d{1,5})->((?:\d{1,3}\.){3}\d{1,3})/(\d{1,5})")
+                .unwrap();
 
         let re_flow_colon = Regex::new(
-            r"((?:\d{1,3}\.){3}\d{1,3}):(\d{1,5})\s*->\s*((?:\d{1,3}\.){3}\d{1,3}):(\d{1,5})"
-        ).unwrap();
+            r"((?:\d{1,3}\.){3}\d{1,3}):(\d{1,5})\s*->\s*((?:\d{1,3}\.){3}\d{1,3}):(\d{1,5})",
+        )
+        .unwrap();
 
         let first = samples[0];
 
@@ -592,8 +655,10 @@ impl Onboarder {
         let re_ip = Regex::new(r"^(?:\d{1,3}\.){3}\d{1,3}$").unwrap();
         let re_port = Regex::new(r"^\d{1,5}$").unwrap();
         let re_proto = Regex::new(r"^(?i)(TCP|UDP|ICMP|GRE|ESP|AH|IGMP|SCTP)$").unwrap();
-        let re_action = Regex::new(r"^(?i)(accept|deny|drop|permit|block|reject|pass|allow)$").unwrap();
-        let re_timestamp = Regex::new(r"^\d{4}[-/]\d{2}[-/]\d{2}(?:[T\s]\d{2}:\d{2}:\d{2})?$").unwrap();
+        let re_action =
+            Regex::new(r"^(?i)(accept|deny|drop|permit|block|reject|pass|allow)$").unwrap();
+        let re_timestamp =
+            Regex::new(r"^\d{4}[-/]\d{2}[-/]\d{2}(?:[T\s]\d{2}:\d{2}:\d{2})?$").unwrap();
 
         let split_lines: Vec<Vec<&str>> = samples
             .iter()

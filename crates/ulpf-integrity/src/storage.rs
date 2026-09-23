@@ -16,7 +16,9 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use arrow::array::{Array, ArrayRef, Int64Array, RecordBatch, StringArray, UInt32Array, UInt64Array};
+use arrow::array::{
+    Array, ArrayRef, Int64Array, RecordBatch, StringArray, UInt32Array, UInt64Array,
+};
 use arrow::datatypes::{DataType, Field, Schema, SchemaRef};
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 use parquet::arrow::arrow_writer::ArrowWriter;
@@ -169,8 +171,8 @@ pub fn write_parquet_file(
             .with_context(|| format!("Failed to create parent directory {:?}", parent))?;
     }
 
-    let file = File::create(path)
-        .with_context(|| format!("Failed to create file at {:?}", path))?;
+    let file =
+        File::create(path).with_context(|| format!("Failed to create file at {:?}", path))?;
 
     let props = WriterProperties::builder()
         .set_compression(compression.into())
@@ -179,7 +181,9 @@ pub fn write_parquet_file(
     let mut writer = ArrowWriter::try_new(file, batch.schema(), Some(props))
         .context("Failed to initialize ArrowWriter")?;
 
-    writer.write(batch).context("Failed to write batch to Parquet")?;
+    writer
+        .write(batch)
+        .context("Failed to write batch to Parquet")?;
     writer.close().context("Failed to close Parquet writer")?;
 
     Ok(())
@@ -198,12 +202,14 @@ pub fn write_records_to_parquet(
 /// Reads all records from a Parquet file.
 pub fn read_parquet_file(path: impl AsRef<Path>) -> Result<Vec<StoredLogRecord>> {
     let path = path.as_ref();
-    let file = File::open(path)
-        .with_context(|| format!("Failed to open Parquet file at {:?}", path))?;
+    let file =
+        File::open(path).with_context(|| format!("Failed to open Parquet file at {:?}", path))?;
 
     let builder = ParquetRecordBatchReaderBuilder::try_new(file)
         .context("Failed to create ParquetRecordBatchReaderBuilder")?;
-    let reader = builder.build().context("Failed to build ParquetRecordBatchReader")?;
+    let reader = builder
+        .build()
+        .context("Failed to build ParquetRecordBatchReader")?;
 
     let mut all_records = Vec::new();
     for maybe_batch in reader {

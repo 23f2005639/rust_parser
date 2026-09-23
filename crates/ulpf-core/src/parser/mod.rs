@@ -1,10 +1,12 @@
 pub mod classifier;
 pub mod extractors;
+pub mod lru_cache;
 
 pub use classifier::{Classifier, VendorFormat};
 pub use extractors::{
     CiscoAsaExtractor, FortigateExtractor, PaloAltoExtractor, PfSenseExtractor, SuricataExtractor,
 };
+pub use lru_cache::{LruStats, SignatureLruCache};
 
 use chrono::Utc;
 use sha2::{Digest, Sha256};
@@ -29,6 +31,7 @@ pub struct UniversalParser {
     paloalto: PaloAltoExtractor,
     suricata: SuricataExtractor,
     pfsense: PfSenseExtractor,
+    pub cache: SignatureLruCache,
 }
 
 impl UniversalParser {
@@ -40,6 +43,7 @@ impl UniversalParser {
             paloalto: PaloAltoExtractor::new(),
             suricata: SuricataExtractor::new(),
             pfsense: PfSenseExtractor::new(),
+            cache: SignatureLruCache::new(),
         }
     }
 
@@ -64,7 +68,10 @@ impl UniversalParser {
             VendorFormat::Suricata => self.suricata.parse(raw)?,
             VendorFormat::PfSense => self.pfsense.parse(raw)?,
             VendorFormat::Unknown => {
-                return Err(anyhow::anyhow!("Unrecognized log format for raw line: {}", raw));
+                return Err(anyhow::anyhow!(
+                    "Unrecognized log format for raw line: {}",
+                    raw
+                ));
             }
         };
 
@@ -102,9 +109,95 @@ impl UniversalParser {
                     ConnectionInfo::default(),
                     None,
                     metadata,
-                ).with_unmapped(unmapped)
+                )
+                .with_unmapped(unmapped)
             }
         }
+    }
+
+    /// Parse directly with a known pre-classified VendorFormat, skipping classification completely
+    #[inline]
+    pub fn parse_with_format(
+        &self,
+        raw: &str,
+        format: VendorFormat,
+    ) -> anyhow::Result<NetworkActivity> {
+        let raw_hash = compute_sha256(raw.as_bytes());
+        let event_id = Uuid::now_v7().to_string();
+        let ingest_time = Utc::now().timestamp_millis();
+
+        let mut activity = match format {
+            VendorFormat::CiscoAsa => self.cisco_asa.parse(raw)?,
+            VendorFormat::Fortinet => self.fortigate.parse(raw)?,
+            VendorFormat::PaloAlto => self.paloalto.parse(raw)?,
+            VendorFormat::Suricata => self.suricata.parse(raw)?,
+            VendorFormat::PfSense => self.pfsense.parse(raw)?,
+            VendorFormat::Unknown => {
+                return Err(anyhow::anyhow!(
+                    "Unrecognized log format for raw line: {}",
+                    raw
+                ));
+            }
+        };
+
+        activity.metadata.raw_data = raw.to_string();
+        activity.metadata.raw_hash = raw_hash;
+        activity.metadata.event_id = event_id;
+        activity.metadata.ingest_time = ingest_time;
+
+        Ok(activity)
+    }
+
+    /// Parse raw log line using Tier-1 Signature LRU Cache fast path
+    pub fn parse_cached(&self, raw: &str) -> anyhow::Result<NetworkActivity> {
+        let sig_hash = SignatureLruCache::compute_signature_hash(raw);
+        let format = match self.cache.get(sig_hash) {
+            Some(fmt) => fmt,
+            None => {
+                let fmt = self.classifier.classify(raw);
+                if fmt != VendorFormat::Unknown {
+                    self.cache.insert(sig_hash, fmt);
+                }
+                fmt
+            }
+        };
+
+        self.parse_with_format(raw, format)
+    }
+
+    /// Lossless parsing using Tier-1 Signature LRU Cache
+    pub fn parse_cached_lossless(&self, raw: &str) -> NetworkActivity {
+        match self.parse_cached(raw) {
+            Ok(activity) => activity,
+            Err(err) => {
+                let raw_hash = compute_sha256(raw.as_bytes());
+                let event_id = Uuid::now_v7().to_string();
+                let now_ms = Utc::now().timestamp_millis();
+
+                let mut unmapped = std::collections::HashMap::new();
+                unmapped.insert("parse_error".to_string(), err.to_string());
+
+                let product = Product::new("Unknown", "Generic / Unparsed", None);
+                let metadata = Metadata::new(product, raw, raw_hash, event_id, now_ms);
+
+                NetworkActivity::new(
+                    activity_id::OTHER,
+                    now_ms,
+                    disposition::UNKNOWN,
+                    Endpoint::default(),
+                    Endpoint::default(),
+                    ConnectionInfo::default(),
+                    None,
+                    metadata,
+                )
+                .with_unmapped(unmapped)
+            }
+        }
+    }
+
+    /// Query LRU cache statistics
+    pub fn cache_stats(&self) -> LruStats {
+        self.cache.stats()
     }
 }
 

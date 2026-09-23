@@ -7,7 +7,8 @@ pub use ingest::{
     UdpSyslogListener,
 };
 pub use parser::{
-    compute_sha256, Classifier, LogParser, UniversalParser, VendorFormat,
+    compute_sha256, Classifier, LogParser, LruStats, SignatureLruCache, UniversalParser,
+    VendorFormat,
 };
 pub use schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product, Traffic,

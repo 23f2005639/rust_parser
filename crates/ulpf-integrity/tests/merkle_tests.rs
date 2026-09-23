@@ -1,13 +1,13 @@
-use tempfile::TempDir;
 use sha2::Digest;
+use tempfile::TempDir;
 
+use ulpf_integrity::batcher::{BatchAccumulator, BatcherConfig, IncomingLog};
 use ulpf_integrity::merkle::{
     empty_tree_hash, hash_leaf, verify_consistency_proof, Hash, MerkleTree, Side,
 };
 use ulpf_integrity::storage::{
     read_parquet_file, write_records_to_parquet, ParquetCompression, StoredLogRecord,
 };
-use ulpf_integrity::batcher::{BatchAccumulator, BatcherConfig, IncomingLog};
 use ulpf_integrity::tamper::{verify_block_file, verify_block_with_ledger, TamperReason};
 
 /// Helper to generate synthetic log strings for testing
@@ -69,9 +69,12 @@ fn test_merkle_tree_scale_building() {
         // Verify inclusion proof for first, middle, last leaves
         let test_indices = [0, scale / 2, scale - 1];
         for &idx in &test_indices {
-            let proof = tree
-                .inclusion_proof(idx)
-                .unwrap_or_else(|e| panic!("Failed to get proof for scale {} index {}: {:?}", scale, idx, e));
+            let proof = tree.inclusion_proof(idx).unwrap_or_else(|e| {
+                panic!(
+                    "Failed to get proof for scale {} index {}: {:?}",
+                    scale, idx, e
+                )
+            });
 
             assert_eq!(proof.leaf_index, idx);
             assert_eq!(proof.tree_size, scale);
@@ -108,10 +111,10 @@ fn test_inclusion_proof_arbitrary_indices_and_tree_sizes() {
         let tree = MerkleTree::from_raw_logs(logs.iter().map(|s| s.as_bytes()));
 
         // Check every single leaf in this tree
-        for i in 0..n {
+        for (i, log) in logs.iter().enumerate().take(n) {
             let proof = tree.inclusion_proof(i).expect("proof generation");
             assert!(
-                proof.verify(logs[i].as_bytes(), &tree.root()),
+                proof.verify(log.as_bytes(), &tree.root()),
                 "Failed verification for tree size {} leaf {}",
                 n,
                 i
@@ -251,8 +254,7 @@ fn test_batcher_dual_trigger_count_and_ledger() {
 
     // Check ledger file
     assert!(ledger_path.exists());
-    let ledger_entries =
-        BatchAccumulator::load_ledger_entries(&ledger_path).expect("load ledger");
+    let ledger_entries = BatchAccumulator::load_ledger_entries(&ledger_path).expect("load ledger");
     assert_eq!(ledger_entries.len(), 1);
     let entry = &ledger_entries[0];
     assert_eq!(entry.block_id, 0);
@@ -260,8 +262,8 @@ fn test_batcher_dual_trigger_count_and_ledger() {
     assert_eq!(entry.merkle_root, flush_result.merkle_root.to_hex());
 
     // Forensic verification on the newly flushed block
-    let report = verify_block_with_ledger(&flush_result.parquet_path, &ledger_path)
-        .expect("verify block");
+    let report =
+        verify_block_with_ledger(&flush_result.parquet_path, &ledger_path).expect("verify block");
     assert!(report.is_valid, "Flushed block must pass verification!");
     assert_eq!(report.actual_records, 20);
     assert!(report.tampered_records.is_empty());
@@ -327,13 +329,15 @@ fn test_forensic_tamper_detection_byte_flip() {
 
     let mut batcher = BatchAccumulator::new(config).expect("init");
     for log in generate_logs(50) {
-        batcher.push(IncomingLog::new("suricata", log)).expect("push");
+        batcher
+            .push(IncomingLog::new("suricata", log))
+            .expect("push");
     }
     let flush = batcher.flush().expect("flush").expect("flushed");
 
     // 1. Untampered check passes
-    let clean_report =
-        verify_block_file(&flush.parquet_path, &batcher.in_memory_ledger()[0]).expect("clean report");
+    let clean_report = verify_block_file(&flush.parquet_path, &batcher.in_memory_ledger()[0])
+        .expect("clean report");
     assert!(clean_report.is_valid);
     assert!(clean_report.tampered_records.is_empty());
 
@@ -394,7 +398,9 @@ fn test_forensic_tamper_detection_ip_alteration() {
 
     let mut batcher = BatchAccumulator::new(config).expect("init");
     for log in generate_logs(20) {
-        batcher.push(IncomingLog::new("cisco_asa", log)).expect("push");
+        batcher
+            .push(IncomingLog::new("cisco_asa", log))
+            .expect("push");
     }
     let flush = batcher.flush().expect("flush").expect("flushed");
 
@@ -429,7 +435,9 @@ fn test_forensic_tamper_detection_row_deletion() {
 
     let mut batcher = BatchAccumulator::new(config).expect("init");
     for log in generate_logs(30) {
-        batcher.push(IncomingLog::new("pfsense", log)).expect("push");
+        batcher
+            .push(IncomingLog::new("pfsense", log))
+            .expect("push");
     }
     let flush = batcher.flush().expect("flush").expect("flushed");
 
@@ -491,9 +499,10 @@ fn test_forensic_tamper_detection_hash_recalculation_attack() {
     assert!(report.is_tampered());
     assert_ne!(report.computed_merkle_root, report.ledger_merkle_root);
 
-    let has_root_mismatch = report.tampered_records.iter().any(|r| {
-        matches!(r.reason, TamperReason::MerkleRootMismatch { .. })
-    });
+    let has_root_mismatch = report
+        .tampered_records
+        .iter()
+        .any(|r| matches!(r.reason, TamperReason::MerkleRootMismatch { .. }));
     assert!(
         has_root_mismatch,
         "Must flag MerkleRootMismatch when attacker recalculates raw_hash"
@@ -512,17 +521,14 @@ fn test_rfc6962_consistency_proof() {
     let proof = tree_30.consistency_proof(12).expect("consistency proof");
     assert!(!proof.is_empty());
 
-    let is_consistent = verify_consistency_proof(
-        12,
-        30,
-        &tree_12.root(),
-        &tree_30.root(),
-        &proof,
-    );
+    let is_consistent = verify_consistency_proof(12, 30, &tree_12.root(), &tree_30.root(), &proof);
     assert!(is_consistent, "RFC 6962 consistency proof must verify!");
 
     // Inconsistent snapshot check
     let fake_root = Hash::from_bytes([0x42; 32]);
     let invalid = verify_consistency_proof(12, 30, &fake_root, &tree_30.root(), &proof);
-    assert!(!invalid, "Consistency check must fail with invalid prev_root");
+    assert!(
+        !invalid,
+        "Consistency check must fail with invalid prev_root"
+    );
 }

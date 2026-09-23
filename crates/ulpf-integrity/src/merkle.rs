@@ -6,9 +6,9 @@
 //! - Empty Tree Hash: `SHA256("")`
 //! - Tree balancing: Split at largest power of 2 strictly less than N.
 
-use std::fmt;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sha2::{Digest, Sha256};
+use std::fmt;
 use thiserror::Error;
 
 /// Domain separation prefixes as mandated by RFC 6962 Section 2.1.
@@ -117,7 +117,10 @@ pub fn empty_tree_hash() -> Hash {
 /// Finds the largest power of two strictly smaller than `n` ($k < n \le 2k$).
 #[inline]
 pub fn largest_power_of_two_less_than(n: usize) -> usize {
-    assert!(n > 1, "n must be > 1 to find largest power of two less than n");
+    assert!(
+        n > 1,
+        "n must be > 1 to find largest power of two less than n"
+    );
     1 << (usize::BITS - 1 - (n - 1).leading_zeros())
 }
 
@@ -157,7 +160,9 @@ impl TreeNode {
     fn collect_audit_path(&self, target_idx: usize, path: &mut Vec<(Hash, Side)>) {
         match self {
             TreeNode::Leaf { .. } => {}
-            TreeNode::Internal { size, left, right, .. } => {
+            TreeNode::Internal {
+                size, left, right, ..
+            } => {
                 let k = largest_power_of_two_less_than(*size);
                 if target_idx < k {
                     // Target is in left subtree; sibling is right subtree
@@ -184,12 +189,24 @@ pub struct InclusionProof {
 impl InclusionProof {
     /// Verifies this proof against the given raw log bytes and the expected Merkle root.
     pub fn verify(&self, raw_log: &[u8], expected_root: &Hash) -> bool {
-        verify_inclusion_proof(raw_log, self.leaf_index, self.tree_size, &self.audit_path, expected_root)
+        verify_inclusion_proof(
+            raw_log,
+            self.leaf_index,
+            self.tree_size,
+            &self.audit_path,
+            expected_root,
+        )
     }
 
     /// Verifies this proof against the pre-calculated leaf hash and the expected Merkle root.
     pub fn verify_hash(&self, leaf_hash: &Hash, expected_root: &Hash) -> bool {
-        verify_inclusion_proof_by_hash(leaf_hash, self.leaf_index, self.tree_size, &self.audit_path, expected_root)
+        verify_inclusion_proof_by_hash(
+            leaf_hash,
+            self.leaf_index,
+            self.tree_size,
+            &self.audit_path,
+            expected_root,
+        )
     }
 }
 
@@ -217,7 +234,10 @@ impl MerkleTree {
         I: IntoIterator<Item = T>,
         T: AsRef<[u8]>,
     {
-        let leaf_hashes: Vec<Hash> = logs.into_iter().map(|item| hash_leaf(item.as_ref())).collect();
+        let leaf_hashes: Vec<Hash> = logs
+            .into_iter()
+            .map(|item| hash_leaf(item.as_ref()))
+            .collect();
         Self::from_leaf_hashes(leaf_hashes)
     }
 
@@ -317,10 +337,7 @@ impl MerkleTree {
     pub fn consistency_proof(&self, prev_size: usize) -> Result<Vec<Hash>, MerkleError> {
         let size = self.leaf_hashes.len();
         if prev_size == 0 || prev_size > size {
-            return Err(MerkleError::InvalidConsistencySize {
-                prev_size,
-                size,
-            });
+            return Err(MerkleError::InvalidConsistencySize { prev_size, size });
         }
         if prev_size == size {
             return Ok(Vec::new());
@@ -443,11 +460,7 @@ fn verify_consistency_internal(
     }
 }
 
-fn verify_subproof_full(
-    m: usize,
-    n: usize,
-    proof: &mut Vec<Hash>,
-) -> Option<(Hash, Hash)> {
+fn verify_subproof_full(m: usize, n: usize, proof: &mut Vec<Hash>) -> Option<(Hash, Hash)> {
     if m == n {
         let h = proof.pop()?;
         Some((h, h))
@@ -460,7 +473,10 @@ fn verify_subproof_full(
         } else {
             let left_mth = proof.pop()?;
             let (sub_m, sub_n) = verify_subproof_full(m - k, n - k, proof)?;
-            Some((hash_children(&left_mth, &sub_m), hash_children(&left_mth, &sub_n)))
+            Some((
+                hash_children(&left_mth, &sub_m),
+                hash_children(&left_mth, &sub_n),
+            ))
         }
     }
 }

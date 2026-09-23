@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use chrono::Utc;
+use std::collections::HashMap;
 
+use super::{protocol_num_from_name, split_csv};
 use crate::schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product,
 };
-use super::{protocol_num_from_name, split_csv};
 
 pub struct PfSenseExtractor;
 
@@ -151,7 +151,8 @@ impl PfSenseExtractor {
             connection_info,
             None,
             metadata,
-        ).with_unmapped(unmapped))
+        )
+        .with_unmapped(unmapped))
     }
 }
 

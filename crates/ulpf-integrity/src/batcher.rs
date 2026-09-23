@@ -153,8 +153,9 @@ impl BatchAccumulator {
             if trimmed.is_empty() {
                 continue;
             }
-            let entry: LedgerEntry = serde_json::from_str(trimmed)
-                .with_context(|| format!("Failed parsing ledger entry at line {}: {}", idx, trimmed))?;
+            let entry: LedgerEntry = serde_json::from_str(trimmed).with_context(|| {
+                format!("Failed parsing ledger entry at line {}: {}", idx, trimmed)
+            })?;
             entries.push(entry);
         }
 
@@ -300,10 +301,9 @@ impl BatchAccumulator {
             .open(&self.config.ledger_path)
             .with_context(|| format!("Failed opening ledger at {:?}", self.config.ledger_path))?;
 
-        let serialized = serde_json::to_string(entry)
-            .context("Failed serializing ledger entry to JSON")?;
-        writeln!(file, "{}", serialized)
-            .context("Failed appending entry to ledger file")?;
+        let serialized =
+            serde_json::to_string(entry).context("Failed serializing ledger entry to JSON")?;
+        writeln!(file, "{}", serialized).context("Failed appending entry to ledger file")?;
         file.flush().context("Failed syncing ledger file")?;
 
         Ok(())

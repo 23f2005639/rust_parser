@@ -1,11 +1,11 @@
-use std::collections::HashMap;
 use chrono::Utc;
 use serde_json::Value;
+use std::collections::HashMap;
 
+use super::{parse_rfc3339_or_fallback, protocol_num_from_name};
 use crate::schema::ocsf::{
     activity_id, disposition, ConnectionInfo, Endpoint, Metadata, NetworkActivity, Product, Traffic,
 };
-use super::{parse_rfc3339_or_fallback, protocol_num_from_name};
 
 pub struct SuricataExtractor;
 
@@ -79,7 +79,11 @@ impl SuricataExtractor {
             let pkts_toserver = flow_obj.get("pkts_toserver").and_then(|v| v.as_u64());
             let pkts_toclient = flow_obj.get("pkts_toclient").and_then(|v| v.as_u64());
 
-            if bytes_toserver.is_some() || bytes_toclient.is_some() || pkts_toserver.is_some() || pkts_toclient.is_some() {
+            if bytes_toserver.is_some()
+                || bytes_toclient.is_some()
+                || pkts_toserver.is_some()
+                || pkts_toclient.is_some()
+            {
                 traffic = Some(Traffic::new(
                     bytes_toclient,
                     bytes_toserver,
@@ -145,7 +149,8 @@ impl SuricataExtractor {
             connection_info,
             traffic,
             metadata,
-        ).with_unmapped(unmapped))
+        )
+        .with_unmapped(unmapped))
     }
 }
 
@@ -176,7 +181,10 @@ mod tests {
         assert_eq!(event.connection_info.protocol_num, Some(6));
 
         let unmapped = event.unmapped.unwrap();
-        assert_eq!(unmapped.get("alert_signature").map(|s| s.as_str()), Some("ET SCAN Potential SSH Scan"));
+        assert_eq!(
+            unmapped.get("alert_signature").map(|s| s.as_str()),
+            Some("ET SCAN Potential SSH Scan")
+        );
     }
 
     #[test]

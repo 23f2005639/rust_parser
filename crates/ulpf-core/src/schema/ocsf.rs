@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// OCSF 1.3 Category UID for Network Activity
 pub const CATEGORY_UID_NETWORK_ACTIVITY: u8 = 4;
@@ -131,7 +131,11 @@ pub struct Product {
 }
 
 impl Product {
-    pub fn new(vendor_name: impl Into<String>, name: impl Into<String>, version: Option<String>) -> Self {
+    pub fn new(
+        vendor_name: impl Into<String>,
+        name: impl Into<String>,
+        version: Option<String>,
+    ) -> Self {
         Self {
             vendor_name: vendor_name.into(),
             name: name.into(),
