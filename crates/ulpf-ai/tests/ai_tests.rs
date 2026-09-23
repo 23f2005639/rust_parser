@@ -18,19 +18,34 @@ fn test_drain_template_clustering_cisco_asa() {
 
     let res1 = miner.add_log(log1);
     assert_eq!(res1.cluster_id, 1);
-    assert!(res1.anomaly.is_some(), "First occurrence should trigger NewTemplate alert");
+    assert!(
+        res1.anomaly.is_some(),
+        "First occurrence should trigger NewTemplate alert"
+    );
     assert_eq!(res1.anomaly.unwrap().anomaly_type, AnomalyType::NewTemplate);
 
     let res2 = miner.add_log(log2);
-    assert_eq!(res2.cluster_id, 1, "Log 2 should match existing Cisco ASA template");
-    assert!(res2.anomaly.is_none(), "Matched template should not trigger alert");
+    assert_eq!(
+        res2.cluster_id, 1,
+        "Log 2 should match existing Cisco ASA template"
+    );
+    assert!(
+        res2.anomaly.is_none(),
+        "Matched template should not trigger alert"
+    );
 
     let res3 = miner.add_log(log3);
-    assert_eq!(res3.cluster_id, 1, "Log 3 should match existing Cisco ASA template");
+    assert_eq!(
+        res3.cluster_id, 1,
+        "Log 3 should match existing Cisco ASA template"
+    );
 
     let cluster = miner.get_cluster(1).expect("Cluster 1 must exist");
     assert_eq!(cluster.count, 3);
-    assert!(cluster.template.contains("<*>"), "Template should contain wildcard token");
+    assert!(
+        cluster.template.contains("<*>"),
+        "Template should contain wildcard token"
+    );
 }
 
 #[test]
@@ -87,7 +102,10 @@ fn test_drain_anomaly_detection_unknown_template() {
     let attack_log = "ALERT_MALICIOUS_BUFFER_OVERFLOW: exploit attempt detected from 45.33.32.156 target_port=445 payload_size=1024";
     let res = miner.add_log(attack_log);
 
-    assert_eq!(res.cluster_id, 2, "Novel structural log must create a new cluster");
+    assert_eq!(
+        res.cluster_id, 2,
+        "Novel structural log must create a new cluster"
+    );
     assert!(res.anomaly.is_some(), "Must generate anomaly alert");
     let alert = res.anomaly.unwrap();
     assert_eq!(alert.anomaly_type, AnomalyType::NewTemplate);
@@ -144,9 +162,14 @@ fn test_onboarder_synthesize_juniper_srx() {
         "RT_FLOW: RT_FLOW_SESSION_CREATE: session created 172.16.5.20/38112->203.0.113.88/8080 None None 6 app-out trust dmz 12349 N/A(N/A) ge-0/0/1.0",
     ];
 
-    let (parser_def, report) = Onboarder::generate_parser("juniper_srx", "srx-300", &samples).expect("Synthesis must succeed");
+    let (parser_def, report) = Onboarder::generate_parser("juniper_srx", "srx-300", &samples)
+        .expect("Synthesis must succeed");
 
-    assert!(report.passed, "Synthesized parser must pass 100% validation: {:?}", report.errors);
+    assert!(
+        report.passed,
+        "Synthesized parser must pass 100% validation: {:?}",
+        report.errors
+    );
     assert_eq!(report.total_samples, 3);
     assert_eq!(report.matched_samples, 3);
 
@@ -175,7 +198,11 @@ fn test_onboarder_checkpoint_format() {
     let (parser_def, report) = Onboarder::generate_parser("CheckPoint", "Quantum", &samples)
         .expect("Failed to generate CheckPoint parser");
 
-    assert!(report.passed, "Sandbox validation passed: {:?}", report.errors);
+    assert!(
+        report.passed,
+        "Sandbox validation passed: {:?}",
+        report.errors
+    );
     assert_eq!(report.matched_samples, 3);
 
     let event1 = parser_def.parse(samples[0]).unwrap();
@@ -201,14 +228,17 @@ fn test_dynamic_parser_registry() {
         "FIREWALL_EVENT: pass proto=TCP src=192.168.1.20 srcport=44301 dst=10.0.0.6 dstport=80 action=allow",
     ];
 
-    let (parser_def, report) = Onboarder::generate_parser("custom_waf", "waf-v1", &samples).expect("Synthesis");
+    let (parser_def, report) =
+        Onboarder::generate_parser("custom_waf", "waf-v1", &samples).expect("Synthesis");
     assert!(report.passed);
     registry.register(parser_def);
 
     assert_eq!(registry.len(), 1);
 
     let test_log = "FIREWALL_EVENT: pass proto=TCP src=172.16.0.1 srcport=33000 dst=192.168.1.1 dstport=22 action=allow";
-    let parsed = registry.parse("custom_waf", test_log).expect("Parse with custom_waf");
+    let parsed = registry
+        .parse("custom_waf", test_log)
+        .expect("Parse with custom_waf");
     assert_eq!(parsed.src_endpoint.ip.as_deref(), Some("172.16.0.1"));
     assert_eq!(parsed.src_endpoint.port, Some(33000));
     assert_eq!(parsed.dst_endpoint.ip.as_deref(), Some("192.168.1.1"));
@@ -247,4 +277,73 @@ fn test_drain_microsecond_performance() {
         max_allowed_micros,
         avg_micros
     );
+}
+
+#[test]
+fn test_drain_unique_event_patterns_anchor_tokens() {
+    let mut miner = DrainMiner::new(DrainConfig::default());
+
+    // Two firewall logs with identical length and structure, differing only in action: ALLOW vs DENY
+    let log_allow =
+        "FIREWALL connection 1001 protocol TCP action ALLOW src 192.168.1.10 dst 10.0.0.1";
+    let log_deny =
+        "FIREWALL connection 1002 protocol TCP action DENY src 192.168.1.10 dst 10.0.0.1";
+
+    let res1 = miner.add_log(log_allow);
+    assert_eq!(res1.cluster_id, 1);
+    assert!(res1.is_new);
+
+    let res2 = miner.add_log(log_deny);
+    // In vanilla Drain without anchor tokens, 8 out of 9 tokens match (88% similarity > 50% threshold),
+    // which would improperly merge them into "FIREWALL connection <*> protocol TCP action <*> src <*> dst <*>".
+    // With DrainDotNet's UniqueEventPatterns anchor tokens, ALLOW != DENY forces similarity to 0.0,
+    // creating a distinct cluster!
+    assert_eq!(
+        res2.cluster_id, 2,
+        "Anchor tokens (ALLOW vs DENY) must NEVER be merged into a single cluster"
+    );
+    assert!(res2.is_new);
+
+    let cluster1 = miner.get_cluster(1).unwrap();
+    let cluster2 = miner.get_cluster(2).unwrap();
+
+    assert!(cluster1.template.contains("ALLOW"));
+    assert!(cluster2.template.contains("DENY"));
+}
+
+#[test]
+fn test_evaluator_comparative_run() {
+    use ulpf_ai::EvaluatorEngine;
+
+    let sample_corpus = vec![
+        "%ASA-6-302013: Built inbound UDP connection 1001 for outside:1.1.1.1/53 to inside:2.2.2.2/53".to_string(),
+        "%ASA-6-302013: Built inbound UDP connection 1002 for outside:1.1.1.2/53 to inside:2.2.2.3/53".to_string(),
+        r#"date=2026-09-21 time=14:00:02 devname="FGT-DC-EDGE" type="traffic" srcip=10.0.0.1"#.to_string(),
+        "1,2026/09/21 14:00:01,001801000001,TRAFFIC,deny,2304,2026/09/21 14:00:00,192.168.1.19,203.0.113.87,198.51.100.32,203.0.113.87,Trust_to_Untrust,acme\\agarcia,,ping,vsys1,DMZ,WAN,ethernet1/1,ethernet1/2,default,,100412,1,0,0,0,0,0x400000,icmp,drop,4983547,454039,4529508,9510,2026/09/21 13:56:28,213,web-hosting,0,100000129,0x0".to_string(),
+    ];
+
+    let report = EvaluatorEngine::evaluate(&sample_corpus, 1, 2);
+
+    let baseline = report
+        .baseline
+        .as_ref()
+        .expect("Baseline result should be present");
+    assert!(baseline.throughput.events_per_sec > 0.0);
+    assert!(baseline.accuracy.lossless_sha256_match_pct >= 99.0);
+    assert!(baseline.accuracy.vendor_classification_accuracy_pct >= 95.0);
+
+    let tiered = report
+        .tiered_pipeline
+        .as_ref()
+        .expect("Tiered result should be present");
+    assert!(tiered.throughput.events_per_sec > 0.0);
+    assert!(tiered.accuracy.action_inviolability_pct >= 100.0);
+    assert!(tiered.accuracy.grouping_accuracy_ga_pct >= 75.0);
+    assert!(tiered.latency.p50_micros > 0.0);
+
+    let md = report.to_markdown();
+    assert!(md.contains("ULPF Hardcore Architectural"));
+
+    let terminal_dash = report.render_terminal_dashboard();
+    assert!(terminal_dash.contains("ULPF HARDCORE ARCHITECTURAL & ACCURACY EVALUATOR"));
 }
