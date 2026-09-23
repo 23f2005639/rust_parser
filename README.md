@@ -115,11 +115,24 @@ logs_proj/
 │   ├── ulpf-generator/    # Asynchronous high-rate multi-threaded UDP/TCP Syslog traffic generator
 │   └── ulpf-cli/          # Unified operational CLI binary (`ulpf`)
 ├── data/
-│   └── raw/               # Diverse perimeter datasets: Cisco ASA, FortiGate, PAN-OS, Suricata, pfSense, Kaggle firewall
+│   ├── raw/               # Diverse perimeter datasets: Cisco ASA, FortiGate, PAN-OS, Suricata, pfSense, Kaggle firewall
+│   ├── parquet/           # Columnar Apache Parquet database blocks (sample blocks tracked in git)
+│   └── ledger.jsonl       # Append-only cryptographic Merkle ledger tracking root hashes
 ├── docs/                  # Architecture specifications, presentations, evaluation dossiers, and demo scripts
 ├── eval_hardcore_report.md# Exported empirical comparative benchmark & accuracy report
 └── Cargo.toml             # Workspace definition with release optimization profiles
 ```
+
+---
+
+## Datasets & Database Storage Locations
+
+| Data Category | Directory / File | Description & Record Count | Tracked in Git |
+| :--- | :--- | :--- | :---: |
+| **Ground-Truth Test Corpus** | [`data/raw/`](data/raw/) | 1,300 diverse raw perimeter log records across 6 formats (Cisco ASA, Fortinet, PAN-OS, Suricata, pfSense, Kaggle firewall) | **Yes** |
+| **Dynamic Parser Exemplars** | [`sample_new_firewall.log`](sample_new_firewall.log) | Unknown vendor log samples for air-gapped 1-click regex synthesizer testing | **Yes** |
+| **Columnar Parquet Database** | [`data/parquet/`](data/parquet/) | Snappy-compressed Apache Parquet database blocks storing full OCSF 1.3 `NetworkActivity` events and lossless raw logs (`block_00000.parquet`, `block_00001.parquet`) | **Yes (Samples)** |
+| **Cryptographic Merkle Ledger** | [`data/ledger.jsonl`](data/ledger.jsonl) | Append-only ledger recording block indices, timestamps, leaf counts, and 32-byte Merkle roots for RFC 6962 audit | **Yes** |
 
 ---
 
@@ -153,13 +166,16 @@ Run the isolated benchmarking passes to measure throughput, latency spectrum, an
 ./target/release/ulpf-generator --target 127.0.0.1:5140 --proto udp --rate 200000 --duration 10 --dataset all
 ```
 
-### 4. Forensic Tamper Detection & Proof Verification
+### 4. Forensic Tamper Detection & Record Inspection
 ```bash
-# Verify integrity of Parquet archives against the Merkle ledger
-./target/release/ulpf verify --parquet ./data/parquet/block_00000.parquet --ledger ./data/ledger.jsonl
+# Verify integrity of an archived Parquet block against the Merkle ledger (100% PASS)
+./target/release/ulpf verify --file ./data/parquet/block_00001.parquet --ledger ./data/ledger.jsonl
 
-# Generate an O(log N) Merkle Inclusion Proof for a specific record
-./target/release/ulpf proof --parquet ./data/parquet/block_00000.parquet --index 42
+# Audit tampered block to demonstrate forensic detection of altered bits (ALARM)
+./target/release/ulpf verify --file ./data/parquet/block_00000.parquet --ledger ./data/ledger.jsonl
+
+# Inspect individual forensic records inside an archived Parquet database block
+./target/release/ulpf inspect --file ./data/parquet/block_00001.parquet --count 1
 ```
 
 ### 5. Automated 1-Click Parser Onboarding

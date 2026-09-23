@@ -1,6 +1,8 @@
 /target
 /data/parquet/*.parquet
-/data/ledger.jsonl
+!data/parquet/block_00000.parquet
+!data/parquet/block_00001.parquet
+!data/ledger.jsonl
 /data/parsers/*.json
 /data/parsers/*.yaml
 *.log
