@@ -93,6 +93,7 @@ Agents should refer to these core symbols when modifying or extending ULPF:
 * [`UniversalParser`](crates/ulpf-core/src/parser/mod.rs): Unified classifier, cached parser, and multi-vendor normalization engine.
 * [`SignatureLruCache`](crates/ulpf-core/src/parser/lru_cache.rs): High-speed lock-free LRU cache using 64-bit structural signature hashing.
 * [`Classifier`](crates/ulpf-core/src/parser/classifier.rs): Sub-microsecond Aho-Corasick multi-pattern automaton for vendor format identification.
+* [`KaggleExtractor`](crates/ulpf-core/src/parser/extractors/kaggle.rs): Extractor for Kaggle firewall traffic logs and RFC 3164 `%KAGGLE-FW-` packets.
 * [`NetworkActivity`](crates/ulpf-core/src/schema/ocsf.rs): Standard OCSF 1.3 Class UID 4001 event representation.
 * [`SocketIngest`](crates/ulpf-core/src/ingest/socket.rs): Async UDP/TCP socket listener supporting `SO_REUSEPORT` multi-core socket reuse.
 
@@ -112,6 +113,16 @@ Agents should refer to these core symbols when modifying or extending ULPF:
 ---
 
 ## 5. Agent Operational Recipes & Runbooks
+
+### Recipe 0: How to Audit Ingestion & Parsing Health
+Whenever modifying extractors or classifiers, verify 100% extraction and endpoint presence:
+```bash
+./target/release/ulpf audit --data-dir data/raw --verbose
+```
+**Verification Gate:**
+* Classification Rate across all datasets must be **100.0%**.
+* Parsing Success Rate must be **100.0%**.
+* Missing IP Endpoints must be **0**.
 
 ### Recipe 1: How to Add a New Vendor Log Parser
 To add support for a new firewall (e.g. Check Point, Juniper SRX, or VyOS):

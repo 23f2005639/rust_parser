@@ -9,6 +9,7 @@ pub enum VendorFormat {
     PaloAlto,
     Suricata,
     PfSense,
+    KaggleFirewall,
     Unknown,
 }
 
@@ -20,6 +21,7 @@ impl VendorFormat {
             Self::PaloAlto => "Palo Alto PAN-OS",
             Self::Suricata => "Suricata EVE-JSON",
             Self::PfSense => "pfSense Filterlog",
+            Self::KaggleFirewall => "Kaggle Firewall",
             Self::Unknown => "Unknown",
         }
     }
@@ -39,7 +41,10 @@ impl Classifier {
         let patterns_with_formats: Vec<(&str, VendorFormat)> = vec![
             // Cisco ASA signatures
             ("%ASA-", VendorFormat::CiscoAsa),
-            // Fortinet signatures
+            // Fortinet signatures (both KV and CEF)
+            ("CEF:0|Fortinet", VendorFormat::Fortinet),
+            ("|Fortinet|", VendorFormat::Fortinet),
+            ("deviceExternalId=FGT", VendorFormat::Fortinet),
             ("devname=\"", VendorFormat::Fortinet),
             ("type=\"traffic\"", VendorFormat::Fortinet),
             ("logid=\"", VendorFormat::Fortinet),
@@ -62,6 +67,9 @@ impl Classifier {
             ("TRAFFIC,start", VendorFormat::PaloAlto),
             ("TRAFFIC,end", VendorFormat::PaloAlto),
             ("PAN-OS", VendorFormat::PaloAlto),
+            // Kaggle Firewall signatures
+            ("%KAGGLE-FW-", VendorFormat::KaggleFirewall),
+            ("firewall-kaggle", VendorFormat::KaggleFirewall),
         ];
 
         let mut patterns = Vec::with_capacity(patterns_with_formats.len());
@@ -114,6 +122,14 @@ impl Classifier {
         {
             return VendorFormat::Fortinet;
         }
+        if (trimmed.starts_with("CEF:") || trimmed.contains("CEF:"))
+            && (trimmed.contains("Fortinet") || trimmed.contains("FortiGate"))
+        {
+            return VendorFormat::Fortinet;
+        }
+        if trimmed.contains("%KAGGLE-FW-") || trimmed.contains("firewall-kaggle") {
+            return VendorFormat::KaggleFirewall;
+        }
         // Palo Alto PAN-OS CSV heuristic: typically has 20+ comma-separated tokens
         let comma_count = trimmed.bytes().filter(|&b| b == b',').count();
         if comma_count >= 15
@@ -124,6 +140,19 @@ impl Classifier {
                 || trimmed.contains("drop"))
         {
             return VendorFormat::PaloAlto;
+        }
+        // Kaggle raw CSV heuristic: exactly 11 commas (12 columns)
+        if comma_count == 11
+            && (trimmed.starts_with("Source Port")
+                || trimmed
+                    .split(',')
+                    .next()
+                    .unwrap_or("")
+                    .trim()
+                    .parse::<u16>()
+                    .is_ok())
+        {
+            return VendorFormat::KaggleFirewall;
         }
 
         VendorFormat::Unknown
@@ -155,6 +184,12 @@ mod tests {
             VendorFormat::Fortinet
         );
         assert_eq!(
+            classifier.classify(
+                "CEF:0|Fortinet|FortiGate|v7.0.2|0000000019|traffic:forward accept|3|deviceExternalId=FGT200F581900120 src=192.168.1.146 spt=25297 dst=203.0.113.207 dpt=80 proto=6 act=accept"
+            ),
+            VendorFormat::Fortinet
+        );
+        assert_eq!(
             classifier.classify("1,2023/10/15 10:20:30,001801000000,TRAFFIC,drop,0,2023/10/15 10:20:30,10.0.0.1,10.0.0.2"),
             VendorFormat::PaloAlto
         );
@@ -167,6 +202,16 @@ mod tests {
                 "Oct 15 10:20:30 pfSense filterlog[12345]: 5,,,1000000103,em0,match,pass,in,4"
             ),
             VendorFormat::PfSense
+        );
+        assert_eq!(
+            classifier.classify(
+                "<134>Sep 21 14:00:00 firewall-kaggle-01 %KAGGLE-FW-1-TRAFFIC: action=\"allow\" src_port=57222 dst_port=53"
+            ),
+            VendorFormat::KaggleFirewall
+        );
+        assert_eq!(
+            classifier.classify("57222,53,54587,53,allow,177,94,83,2,30,1,1"),
+            VendorFormat::KaggleFirewall
         );
         assert_eq!(
             classifier.classify("Random unformatted log line here"),

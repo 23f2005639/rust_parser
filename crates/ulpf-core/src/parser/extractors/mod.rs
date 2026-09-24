@@ -1,11 +1,13 @@
 pub mod cisco_asa;
 pub mod fortigate;
+pub mod kaggle;
 pub mod paloalto;
 pub mod pfsense;
 pub mod suricata;
 
 pub use cisco_asa::CiscoAsaExtractor;
 pub use fortigate::FortigateExtractor;
+pub use kaggle::KaggleExtractor;
 pub use paloalto::PaloAltoExtractor;
 pub use pfsense::PfSenseExtractor;
 pub use suricata::SuricataExtractor;

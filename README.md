@@ -241,7 +241,39 @@ Sample output:
 
 ---
 
-### Step 3: Run Live Syslog Ingestion & High-Rate Traffic Blaster
+### Step 3: Run Ingestion & Parsing Health Diagnostic Audit
+Instantly verify that all raw perimeter device datasets are 100% classified and parsed into OCSF 1.3 without missing endpoints:
+
+```bash
+# Run parsing audit across all datasets (Cisco ASA, FortiGate, PAN-OS, Suricata, pfSense, Kaggle)
+./target/release/ulpf audit --data-dir data/raw --verbose
+```
+
+Sample output:
+```
+====================================================================
+   ULPF - Real-Time Parsing & Ingestion Diagnostic Audit Suite
+====================================================================
+  Data Directory : data/raw
+  Mode           : High-Fidelity OCSF 1.3 Schema Validation
+--------------------------------------------------------------------
+ Dataset File           | Records |     Classified |      Parsed OK | Missing IPs |   Status
+-----------------------+---------+----------------+----------------+-------------+---------
+ cisco_asa.log          |     260 |    260 (100.0%) |    260 (100.0%) |           0 | [PASS]
+ fortigate.log          |     260 |    260 (100.0%) |    260 (100.0%) |           0 | [PASS]
+ paloalto.log           |     260 |    260 (100.0%) |    260 (100.0%) |           0 | [PASS]
+ suricata.json          |     260 |    260 (100.0%) |    260 (100.0%) |           0 | [PASS]
+ pfsense.log            |     260 |    260 (100.0%) |    260 (100.0%) |           0 | [PASS]
+ kaggle_firewall.csv    |    2000 |   2000 (100.0%) |   2000 (100.0%) |           0 | [PASS]
+-----------------------+---------+----------------+----------------+-------------+---------
+ GRAND TOTAL            |    3300 |   3300 (100.0%) |   3300 (100.0%) |           0 | [ALL PASS]
+====================================================================
+[✓] INGESTION & PARSING VERDICT: HEALTHY (100.0% High-Fidelity Extraction, 0 Missing Endpoints)
+```
+
+---
+
+### Step 4: Run Live Syslog Ingestion & High-Rate Traffic Blaster
 Simulate live enterprise perimeter network ingestion:
 
 ```bash
@@ -251,11 +283,11 @@ Simulate live enterprise perimeter network ingestion:
 # Terminal 2: Blast Real-World Firewall Traffic at 200,000 EPS
 ./target/release/ulpf-generator --target 127.0.0.1:5140 --proto udp --rate 200000 --duration 10 --dataset all
 ```
-*The ingestion engine normalizes packets into OCSF 1.3 `NetworkActivity` in real-time, commits every 1,000 events into an RFC 6962 Merkle tree, and flushes Parquet blocks to `./data/parquet/`.*
+*The ingestion engine normalizes packets into OCSF 1.3 `NetworkActivity` in real-time, displays real-time health telemetry (`Parsed OK: 100.0% | Fallback: 0 | Missing IPs: 0`), commits every 1,000 events into an RFC 6962 Merkle tree, and flushes Parquet blocks to `./data/parquet/`.*
 
 ---
 
-### Step 4: Audit Cryptographic Merkle Ledger & Forensic Proofs
+### Step 5: Audit Cryptographic Merkle Ledger & Forensic Proofs
 Audit the Parquet blocks against the append-only cryptographic ledger:
 
 ```bash
@@ -268,7 +300,7 @@ Audit the Parquet blocks against the append-only cryptographic ledger:
 
 ---
 
-### Step 5: Inspect Normalized Forensic Records inside Parquet Blocks
+### Step 6: Inspect Normalized Forensic Records inside Parquet Blocks
 Inspect normalized OCSF fields alongside bit-for-bit raw logs:
 
 ```bash

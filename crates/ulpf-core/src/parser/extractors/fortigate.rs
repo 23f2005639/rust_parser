@@ -28,8 +28,8 @@ impl<'a> Iterator for KvTokenizer<'a> {
 
         let eq_pos = self.s.find('=')?;
         let raw_key = &self.s[..eq_pos];
-        // Extract the word immediately preceding the '='
-        let key = if let Some(space_pos) = raw_key.rfind(|c: char| c.is_whitespace()) {
+        // Extract the word immediately preceding the '=' (handle space or CEF pipe '|')
+        let key = if let Some(space_pos) = raw_key.rfind(|c: char| c.is_whitespace() || c == '|') {
             &raw_key[space_pos + 1..]
         } else {
             raw_key
@@ -108,12 +108,12 @@ impl FortigateExtractor {
 
         for (key, val) in KvTokenizer::new(raw) {
             match key {
-                "srcip" => src_ip = Some(val.to_string()),
-                "dstip" => dst_ip = Some(val.to_string()),
-                "srcport" => src_port = val.parse::<u16>().ok(),
-                "dstport" => dst_port = val.parse::<u16>().ok(),
-                "srcintf" => src_intf = Some(val.to_string()),
-                "dstintf" => dst_intf = Some(val.to_string()),
+                "srcip" | "src" => src_ip = Some(val.to_string()),
+                "dstip" | "dst" => dst_ip = Some(val.to_string()),
+                "srcport" | "spt" => src_port = val.parse::<u16>().ok(),
+                "dstport" | "dpt" => dst_port = val.parse::<u16>().ok(),
+                "srcintf" | "cs2" => src_intf = Some(val.to_string()),
+                "dstintf" | "cs3" => dst_intf = Some(val.to_string()),
                 "srcintfrole" | "srczone" => src_zone = Some(val.to_string()),
                 "dstintfrole" | "dstzone" => dst_zone = Some(val.to_string()),
                 "proto" => {
@@ -126,14 +126,14 @@ impl FortigateExtractor {
                         proto_name = Some(name);
                     }
                 }
-                "action" => action = Some(val.to_string()),
-                "sentbyte" => sent_bytes = val.parse::<u64>().ok(),
-                "rcvdbyte" => rcvd_bytes = val.parse::<u64>().ok(),
+                "action" | "act" => action = Some(val.to_string()),
+                "sentbyte" | "out" => sent_bytes = val.parse::<u64>().ok(),
+                "rcvdbyte" | "in" => rcvd_bytes = val.parse::<u64>().ok(),
                 "sentpkt" => sent_pkts = val.parse::<u64>().ok(),
                 "rcvdpkt" => rcvd_pkts = val.parse::<u64>().ok(),
                 "date" => date_str = Some(val),
                 "time" => time_str = Some(val),
-                "devname" => devname = Some(val.to_string()),
+                "devname" | "dvchost" | "deviceExternalId" => devname = Some(val.to_string()),
                 _ => {
                     unmapped.insert(key.to_string(), val.to_string());
                 }
@@ -148,10 +148,14 @@ impl FortigateExtractor {
 
         // Determine disposition and activity
         let (disp, act_id) = match action.as_deref().map(|s| s.to_ascii_lowercase()).as_deref() {
-            Some("accept") => (disposition::ALLOWED, activity_id::TRAFFIC_FLOW),
-            Some("deny") | Some("block") => (disposition::BLOCKED, activity_id::OTHER),
-            Some("drop") => (disposition::DROPPED, activity_id::OTHER),
-            Some("close") | Some("client-rst") | Some("server-rst") => {
+            Some("accept") | Some("allow") | Some("permitted") => {
+                (disposition::ALLOWED, activity_id::TRAFFIC_FLOW)
+            }
+            Some("deny") | Some("block") | Some("blocked") => {
+                (disposition::BLOCKED, activity_id::OTHER)
+            }
+            Some("drop") | Some("dropped") => (disposition::DROPPED, activity_id::OTHER),
+            Some("close") | Some("client-rst") | Some("server-rst") | Some("timeout") => {
                 (disposition::ALLOWED, activity_id::CLOSE)
             }
             Some("open") | Some("start") => (disposition::ALLOWED, activity_id::OPEN),
@@ -243,5 +247,28 @@ mod tests {
 
         assert_eq!(event.activity_id, activity_id::OTHER);
         assert_eq!(event.disposition, disposition::BLOCKED);
+    }
+
+    #[test]
+    fn test_fortigate_cef_extractor() {
+        let extractor = FortigateExtractor::new();
+        let raw = "CEF:0|Fortinet|FortiGate|v7.0.2|0000000019|traffic:forward accept|3|deviceExternalId=FGT200F581900120 src=192.168.1.146 spt=25297 dst=203.0.113.207 dpt=80 proto=6 act=accept cat=traffic:forward cs1=vdom-dmz cs1Label=vd cs2=port2 cs2Label=srcintf cs3=dmz cs3Label=dstintf cn1=5 cn1Label=policyid app=HTTP in=485401 out=1176097 dvchost=FGT-DC-EDGE";
+        let event = extractor.parse(raw).unwrap();
+
+        assert_eq!(event.activity_id, activity_id::TRAFFIC_FLOW);
+        assert_eq!(event.disposition, disposition::ALLOWED);
+        assert_eq!(event.src_endpoint.ip.as_deref(), Some("192.168.1.146"));
+        assert_eq!(event.src_endpoint.port, Some(25297));
+        assert_eq!(event.src_endpoint.interface.as_deref(), Some("port2"));
+        assert_eq!(event.dst_endpoint.ip.as_deref(), Some("203.0.113.207"));
+        assert_eq!(event.dst_endpoint.port, Some(80));
+        assert_eq!(event.dst_endpoint.interface.as_deref(), Some("dmz"));
+        assert_eq!(event.connection_info.protocol_name.as_deref(), Some("TCP"));
+        assert_eq!(event.connection_info.protocol_num, Some(6));
+
+        let traffic = event.traffic.unwrap();
+        assert_eq!(traffic.bytes_out, Some(1176097));
+        assert_eq!(traffic.bytes_in, Some(485401));
+        assert_eq!(event.metadata.product.name, "FGT-DC-EDGE");
     }
 }

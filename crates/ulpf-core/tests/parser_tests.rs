@@ -409,3 +409,91 @@ fn test_fallback_lossless_parsing_for_unknown_log() {
     );
     assert_eq!(event.metadata.product.vendor_name, "Unknown");
 }
+
+#[test]
+fn test_audit_all_raw_datasets() {
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+    use std::path::Path;
+
+    let parser = UniversalParser::new();
+    let data_dir = Path::new("../../data/raw");
+    let files = [
+        ("cisco_asa.log", "Cisco ASA"),
+        ("fortigate.log", "Fortinet FortiGate"),
+        ("paloalto.log", "Palo Alto PAN-OS"),
+        ("suricata.json", "Suricata EVE-JSON"),
+        ("pfsense.log", "pfSense Filterlog"),
+        ("kaggle_firewall.csv", "Kaggle Firewall"),
+    ];
+
+    println!("\n=== INTENSE AUDIT OF ALL DATASETS IN data/raw ===");
+    for (file_name, _expected_vendor) in &files {
+        let p = if data_dir.join(file_name).exists() {
+            data_dir.join(file_name)
+        } else {
+            Path::new("data/raw").join(file_name)
+        };
+        if !p.exists() {
+            println!("File {:?} does not exist!", p);
+            continue;
+        }
+
+        let f = File::open(&p).unwrap();
+        let reader = BufReader::new(f);
+        let mut total = 0;
+        let mut parsed_ok = 0;
+        let mut classified_ok = 0;
+        let mut missing_ips = 0;
+        let mut first_err: Option<String> = None;
+
+        for line_res in reader.lines() {
+            let line = line_res.unwrap();
+            let trimmed = line.trim();
+            if trimmed.is_empty() || trimmed.starts_with("Source Port") {
+                continue;
+            }
+            total += 1;
+
+            let fmt = parser.classify(trimmed);
+            if fmt != VendorFormat::Unknown {
+                classified_ok += 1;
+            }
+
+            match parser.parse(trimmed) {
+                Ok(act) => {
+                    parsed_ok += 1;
+                    if act.src_endpoint.ip.is_none() || act.dst_endpoint.ip.is_none() {
+                        missing_ips += 1;
+                    }
+                }
+                Err(e) => {
+                    if first_err.is_none() {
+                        first_err = Some(format!("Line: '{}' -> Error: {}", trimmed, e));
+                    }
+                }
+            }
+        }
+
+        println!(
+            "{:<22} | Total: {:>4} | Classified: {:>4} ({:>5.1}%) | Parsed OK: {:>4} ({:>5.1}%) | Missing IPs: {:>3} | First Err: {:?}",
+            file_name,
+            total,
+            classified_ok,
+            (classified_ok as f64 / total as f64) * 100.0,
+            parsed_ok,
+            (parsed_ok as f64 / total as f64) * 100.0,
+            missing_ips,
+            first_err.as_deref().unwrap_or("None")
+        );
+
+        assert_eq!(
+            classified_ok, total,
+            "Classification failed for {}",
+            file_name
+        );
+        assert_eq!(parsed_ok, total, "Parsing failed for {}", file_name);
+        assert_eq!(missing_ips, 0, "Missing IPs found in {}", file_name);
+    }
+    println!("=================================================\n");
+}

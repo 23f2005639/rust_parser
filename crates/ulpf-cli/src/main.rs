@@ -16,7 +16,9 @@ use ulpf_ai::drain::{AlertSeverity, DrainConfig, DrainMiner};
 use ulpf_ai::evaluator::EvaluatorEngine;
 use ulpf_ai::onboarder::{DynamicParserRegistry, Onboarder};
 use ulpf_core::ingest::socket::{create_tcp_listener, create_udp_socket};
+use ulpf_core::parser::classifier::VendorFormat;
 use ulpf_core::parser::UniversalParser;
+use ulpf_core::schema::ocsf::NetworkActivity;
 use ulpf_integrity::batcher::{BatchAccumulator, BatcherConfig, IncomingLog};
 use ulpf_integrity::storage::ParquetCompression;
 use ulpf_integrity::tamper::verify_block_with_ledger;
@@ -49,6 +51,19 @@ enum Commands {
     Inspect(InspectArgs),
     /// Adversarial simulation: stealthily tamper with an archived Parquet record
     Tamper(TamperArgs),
+    /// Audit parsing pipeline health and classification accuracy across raw datasets
+    Audit(AuditArgs),
+}
+
+#[derive(Args, Debug)]
+struct AuditArgs {
+    /// Directory containing raw log dataset files to audit
+    #[arg(short, long, default_value = "data/raw")]
+    data_dir: PathBuf,
+
+    /// Verbose output showing sample normalized events
+    #[arg(short, long, default_value_t = false)]
+    verbose: bool,
 }
 
 #[derive(Args, Debug)]
@@ -87,8 +102,16 @@ struct IngestArgs {
     #[arg(long, default_value = "0.0.0.0:5140")]
     tcp: String,
 
+    /// Transport protocol filter/override: udp, tcp, or both
+    #[arg(long)]
+    proto: Option<String>,
+
+    /// Generic bind address (applies to both UDP/TCP or active protocol)
+    #[arg(long)]
+    bind: Option<String>,
+
     /// Directory for output columnar Parquet archive blocks
-    #[arg(long, default_value = "data/parquet")]
+    #[arg(long, default_value = "data/parquet", alias = "out-dir")]
     parquet_dir: PathBuf,
 
     /// Path to the append-only cryptographic ledger file
@@ -206,6 +229,7 @@ async fn main() -> Result<()> {
         Commands::Evaluate(args) => run_evaluate(args).await,
         Commands::Inspect(args) => run_inspect(args),
         Commands::Tamper(args) => run_tamper(args),
+        Commands::Audit(args) => run_audit(args),
     }
 }
 
@@ -214,6 +238,24 @@ async fn main() -> Result<()> {
 // -----------------------------------------------------------------------------
 
 async fn run_ingest(args: IngestArgs) -> Result<()> {
+    let udp_bind_str = args.bind.as_ref().unwrap_or(&args.udp);
+    let tcp_bind_str = args.bind.as_ref().unwrap_or(&args.tcp);
+
+    let enable_udp = !matches!(
+        args.proto
+            .as_deref()
+            .map(|s| s.to_ascii_lowercase())
+            .as_deref(),
+        Some("tcp")
+    );
+    let enable_tcp = !matches!(
+        args.proto
+            .as_deref()
+            .map(|s| s.to_ascii_lowercase())
+            .as_deref(),
+        Some("udp")
+    );
+
     println!(
         "\x1b[1;36m====================================================================\x1b[0m"
     );
@@ -223,8 +265,12 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
     println!(
         "\x1b[1;36m====================================================================\x1b[0m"
     );
-    println!("  UDP Listener      : {}", args.udp);
-    println!("  TCP Listener      : {}", args.tcp);
+    if enable_udp {
+        println!("  UDP Listener      : {}", udp_bind_str);
+    }
+    if enable_tcp {
+        println!("  TCP Listener      : {}", tcp_bind_str);
+    }
     println!("  Parquet Archive   : {}", args.parquet_dir.display());
     println!("  Merkle Ledger     : {}", args.ledger.display());
     println!(
@@ -252,77 +298,85 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
 
     let (raw_tx, mut raw_rx) = mpsc::channel::<String>(50_000);
     let total_ingested = Arc::new(AtomicU64::new(0));
-    let total_parsed = Arc::new(AtomicU64::new(0));
+    let parsed_ok = Arc::new(AtomicU64::new(0));
+    let fallback_unparsed = Arc::new(AtomicU64::new(0));
+    let missing_ips = Arc::new(AtomicU64::new(0));
     let total_blocks = Arc::new(AtomicU64::new(0));
     let total_anomalies = Arc::new(AtomicU64::new(0));
 
     // Spawn UDP Listener
-    let udp_addr: SocketAddr = args.udp.parse().context("Invalid UDP address")?;
-    let udp_socket = create_udp_socket(udp_addr, args.reuse_port)?;
-    let raw_tx_udp = raw_tx.clone();
-    let total_ingested_udp = total_ingested.clone();
+    if enable_udp {
+        let udp_addr: SocketAddr = udp_bind_str.parse().context("Invalid UDP address")?;
+        let udp_socket = create_udp_socket(udp_addr, args.reuse_port)?;
+        let raw_tx_udp = raw_tx.clone();
+        let total_ingested_udp = total_ingested.clone();
 
-    tokio::spawn(async move {
-        let mut buf = [0u8; 65535];
-        loop {
-            match udp_socket.recv_from(&mut buf).await {
-                Ok((size, _peer)) => {
-                    if let Ok(raw_str) = std::str::from_utf8(&buf[..size]) {
-                        for line in raw_str.lines() {
-                            let trimmed = line.trim();
-                            if !trimmed.is_empty() {
-                                total_ingested_udp.fetch_add(1, Ordering::Relaxed);
-                                if raw_tx_udp.send(trimmed.to_string()).await.is_err() {
-                                    return;
+        tokio::spawn(async move {
+            let mut buf = [0u8; 65535];
+            loop {
+                match udp_socket.recv_from(&mut buf).await {
+                    Ok((size, _peer)) => {
+                        if let Ok(raw_str) = std::str::from_utf8(&buf[..size]) {
+                            for line in raw_str.lines() {
+                                let trimmed = line.trim();
+                                if !trimmed.is_empty() {
+                                    total_ingested_udp.fetch_add(1, Ordering::Relaxed);
+                                    if raw_tx_udp.send(trimmed.to_string()).await.is_err() {
+                                        return;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                Err(e) => {
-                    warn!("UDP receive error: {}", e);
+                    Err(e) => {
+                        warn!("UDP receive error: {}", e);
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     // Spawn TCP Listener
-    let tcp_addr: SocketAddr = args.tcp.parse().context("Invalid TCP address")?;
-    let tcp_listener = create_tcp_listener(tcp_addr, args.reuse_port, 1024)?;
-    let raw_tx_tcp = raw_tx.clone();
-    let total_ingested_tcp = total_ingested.clone();
+    if enable_tcp {
+        let tcp_addr: SocketAddr = tcp_bind_str.parse().context("Invalid TCP address")?;
+        let tcp_listener = create_tcp_listener(tcp_addr, args.reuse_port, 1024)?;
+        let raw_tx_tcp = raw_tx.clone();
+        let total_ingested_tcp = total_ingested.clone();
 
-    tokio::spawn(async move {
-        loop {
-            match tcp_listener.accept().await {
-                Ok((stream, _peer)) => {
-                    let tx = raw_tx_tcp.clone();
-                    let counter = total_ingested_tcp.clone();
-                    tokio::spawn(async move {
-                        let reader = tokio::io::BufReader::new(stream);
-                        use tokio::io::AsyncBufReadExt;
-                        let mut lines = reader.lines();
-                        while let Ok(Some(line)) = lines.next_line().await {
-                            let trimmed = line.trim();
-                            if !trimmed.is_empty() {
-                                counter.fetch_add(1, Ordering::Relaxed);
-                                if tx.send(trimmed.to_string()).await.is_err() {
-                                    break;
+        tokio::spawn(async move {
+            loop {
+                match tcp_listener.accept().await {
+                    Ok((stream, _peer)) => {
+                        let tx = raw_tx_tcp.clone();
+                        let counter = total_ingested_tcp.clone();
+                        tokio::spawn(async move {
+                            let reader = tokio::io::BufReader::new(stream);
+                            use tokio::io::AsyncBufReadExt;
+                            let mut lines = reader.lines();
+                            while let Ok(Some(line)) = lines.next_line().await {
+                                let trimmed = line.trim();
+                                if !trimmed.is_empty() {
+                                    counter.fetch_add(1, Ordering::Relaxed);
+                                    if tx.send(trimmed.to_string()).await.is_err() {
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                    });
-                }
-                Err(e) => {
-                    warn!("TCP accept error: {}", e);
+                        });
+                    }
+                    Err(e) => {
+                        warn!("TCP accept error: {}", e);
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     // Spawn Stats Reporter
     let total_ing_stats = total_ingested.clone();
-    let total_parsed_stats = total_parsed.clone();
+    let parsed_ok_stats = parsed_ok.clone();
+    let fallback_stats = fallback_unparsed.clone();
+    let missing_ips_stats = missing_ips.clone();
     let total_blocks_stats = total_blocks.clone();
     let total_anom_stats = total_anomalies.clone();
 
@@ -335,7 +389,9 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
             let now = Instant::now();
             let elapsed = now.duration_since(last_check).as_secs_f64();
             let current = total_ing_stats.load(Ordering::Relaxed);
-            let parsed = total_parsed_stats.load(Ordering::Relaxed);
+            let ok = parsed_ok_stats.load(Ordering::Relaxed);
+            let fallback = fallback_stats.load(Ordering::Relaxed);
+            let missing = missing_ips_stats.load(Ordering::Relaxed);
             let blocks = total_blocks_stats.load(Ordering::Relaxed);
             let anomalies = total_anom_stats.load(Ordering::Relaxed);
 
@@ -345,10 +401,15 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
             } else {
                 0.0
             };
+            let ok_pct = if current > 0 {
+                (ok as f64 / current as f64) * 100.0
+            } else {
+                100.0
+            };
 
             println!(
-                "\x1b[32m[ULPF LIVE]\x1b[0m Ingest: \x1b[1;37m{:>7.0} EPS\x1b[0m | Total: \x1b[1;37m{:>8}\x1b[0m | Normalized OCSF: \x1b[1;32m{:>8}\x1b[0m | Blocks Anchored: \x1b[1;35m{:>4}\x1b[0m | Anomalies: \x1b[1;33m{:>3}\x1b[0m",
-                eps, current, parsed, blocks, anomalies
+                "\x1b[32m[ULPF LIVE]\x1b[0m Ingest: \x1b[1;37m{:>7.0} EPS\x1b[0m | Total: \x1b[1;37m{:>8}\x1b[0m | Parsed OK: \x1b[1;32m{:>8} ({:>5.1}%)\x1b[0m | Fallback: \x1b[1;31m{:>4}\x1b[0m | Missing IPs: \x1b[1;33m{:>3}\x1b[0m | Anchored Blocks: \x1b[1;35m{:>4}\x1b[0m | Anomalies: \x1b[1;33m{:>3}\x1b[0m",
+                eps, current, ok, ok_pct, fallback, missing, blocks, anomalies
             );
 
             last_check = now;
@@ -367,7 +428,15 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
 
     while let Some(raw_log) = raw_rx.recv().await {
         let event = parser.parse_lossless(&raw_log);
-        total_parsed.fetch_add(1, Ordering::Relaxed);
+        if event.metadata.product.vendor_name == "Unknown" {
+            fallback_unparsed.fetch_add(1, Ordering::Relaxed);
+        } else {
+            parsed_ok.fetch_add(1, Ordering::Relaxed);
+        }
+
+        if event.src_endpoint.ip.is_none() || event.dst_endpoint.ip.is_none() {
+            missing_ips.fetch_add(1, Ordering::Relaxed);
+        }
 
         // Run through Drain3 structural clustering for anomaly detection
         let cluster_res = miner.add_log(&raw_log);
@@ -394,6 +463,181 @@ async fn run_ingest(args: IngestArgs) -> Result<()> {
                 flush_res.parquet_path.display()
             );
         }
+    }
+
+    Ok(())
+}
+
+fn run_audit(args: AuditArgs) -> Result<()> {
+    println!(
+        "\x1b[1;36m====================================================================\x1b[0m"
+    );
+    println!("\x1b[1;32m   ULPF - Real-Time Parsing & Ingestion Diagnostic Audit Suite\x1b[0m");
+    println!(
+        "\x1b[1;36m====================================================================\x1b[0m"
+    );
+    println!("  Data Directory : {}", args.data_dir.display());
+    println!("  Mode           : High-Fidelity OCSF 1.3 Schema Validation");
+    println!(
+        "\x1b[1;36m--------------------------------------------------------------------\x1b[0m"
+    );
+
+    let parser = UniversalParser::new();
+    let files = [
+        ("cisco_asa.log", "Cisco ASA"),
+        ("fortigate.log", "Fortinet FortiGate"),
+        ("paloalto.log", "Palo Alto PAN-OS"),
+        ("suricata.json", "Suricata EVE-JSON"),
+        ("pfsense.log", "pfSense Filterlog"),
+        ("kaggle_firewall.csv", "Kaggle Firewall"),
+    ];
+
+    println!(
+        " \x1b[1;37m{:<22} | {:>7} | {:>14} | {:>14} | {:>11} | {:>8}\x1b[0m",
+        "Dataset File", "Records", "Classified", "Parsed OK", "Missing IPs", "Status"
+    );
+    println!("-----------------------+---------+----------------+----------------+-------------+---------");
+
+    let mut grand_total = 0u64;
+    let mut grand_classified = 0u64;
+    let mut grand_parsed = 0u64;
+    let mut grand_missing_ips = 0u64;
+    let mut all_passed = true;
+
+    for (file_name, expected_vendor) in &files {
+        let file_path = args.data_dir.join(file_name);
+        if !file_path.exists() {
+            println!(" {:<22} | [FILE NOT FOUND IN {:?}]", file_name, file_path);
+            all_passed = false;
+            continue;
+        }
+
+        let file =
+            File::open(&file_path).with_context(|| format!("Failed to open {:?}", file_path))?;
+        let reader = BufReader::new(file);
+
+        let mut total = 0u64;
+        let mut classified = 0u64;
+        let mut parsed = 0u64;
+        let mut missing_ips = 0u64;
+        let mut sample_event: Option<NetworkActivity> = None;
+
+        for line_res in reader.lines() {
+            let line = line_res?;
+            let trimmed = line.trim();
+            if trimmed.is_empty() || trimmed.starts_with("Source Port") {
+                continue;
+            }
+            total += 1;
+
+            let fmt = parser.classify(trimmed);
+            if fmt != VendorFormat::Unknown {
+                classified += 1;
+            }
+
+            if let Ok(event) = parser.parse(trimmed) {
+                parsed += 1;
+                if event.src_endpoint.ip.is_none() || event.dst_endpoint.ip.is_none() {
+                    missing_ips += 1;
+                }
+                if sample_event.is_none() {
+                    sample_event = Some(event);
+                }
+            }
+        }
+
+        grand_total += total;
+        grand_classified += classified;
+        grand_parsed += parsed;
+        grand_missing_ips += missing_ips;
+
+        let pass = classified == total && parsed == total && missing_ips == 0;
+        if !pass {
+            all_passed = false;
+        }
+        let status_badge = if pass {
+            "\x1b[1;32m[PASS]\x1b[0m"
+        } else {
+            "\x1b[1;31m[FAIL]\x1b[0m"
+        };
+
+        let class_pct = if total > 0 {
+            (classified as f64 / total as f64) * 100.0
+        } else {
+            0.0
+        };
+        let parse_pct = if total > 0 {
+            (parsed as f64 / total as f64) * 100.0
+        } else {
+            0.0
+        };
+
+        println!(
+            " {:<22} | {:>7} | {:>6} ({:>5.1}%) | {:>6} ({:>5.1}%) | {:>11} | {:>8}",
+            file_name, total, classified, class_pct, parsed, parse_pct, missing_ips, status_badge
+        );
+
+        if args.verbose {
+            if let Some(s) = sample_event {
+                println!(
+                    "    \x1b[36m└─ Sample ({}):\x1b[0m Src={}:{} Dst={}:{} Action={} Proto={}",
+                    expected_vendor,
+                    s.src_endpoint.ip.as_deref().unwrap_or("N/A"),
+                    s.src_endpoint
+                        .port
+                        .map(|p| p.to_string())
+                        .unwrap_or_else(|| "N/A".into()),
+                    s.dst_endpoint.ip.as_deref().unwrap_or("N/A"),
+                    s.dst_endpoint
+                        .port
+                        .map(|p| p.to_string())
+                        .unwrap_or_else(|| "N/A".into()),
+                    s.disposition,
+                    s.connection_info.protocol_name.as_deref().unwrap_or("N/A")
+                );
+            }
+        }
+    }
+
+    println!("-----------------------+---------+----------------+----------------+-------------+---------");
+    let overall_pct = if grand_total > 0 {
+        (grand_parsed as f64 / grand_total as f64) * 100.0
+    } else {
+        0.0
+    };
+    let class_overall_pct = if grand_total > 0 {
+        (grand_classified as f64 / grand_total as f64) * 100.0
+    } else {
+        0.0
+    };
+
+    println!(
+        " \x1b[1;37m{:<22} | {:>7} | {:>6} ({:>5.1}%) | {:>6} ({:>5.1}%) | {:>11} | {}\x1b[0m",
+        "GRAND TOTAL",
+        grand_total,
+        grand_classified,
+        class_overall_pct,
+        grand_parsed,
+        overall_pct,
+        grand_missing_ips,
+        if all_passed {
+            "\x1b[1;32m[ALL PASS]\x1b[0m"
+        } else {
+            "\x1b[1;31m[DEGRADED]\x1b[0m"
+        }
+    );
+    println!(
+        "\x1b[1;36m====================================================================\x1b[0m"
+    );
+
+    if all_passed {
+        println!(
+            "\x1b[1;32m[✓] INGESTION & PARSING VERDICT: HEALTHY (100.0% High-Fidelity Extraction, 0 Missing Endpoints)\x1b[0m\n"
+        );
+    } else {
+        println!(
+            "\x1b[1;31m[✗] INGESTION & PARSING VERDICT: DEFECTS DETECTED (Some logs failed extraction or missed endpoints)\x1b[0m\n"
+        );
     }
 
     Ok(())

@@ -56,6 +56,7 @@ impl LayaDecisionEngine {
             "paloalto".into(),
             "suricata".into(),
             "pfsense".into(),
+            "kaggle_firewall".into(),
             "juniper_srx".into(),
             "checkpoint".into(),
         ];
@@ -77,6 +78,9 @@ impl LayaDecisionEngine {
         vendor_token_priors.insert(
             "fortigate".into(),
             vec![
+                "CEF:0|Fortinet",
+                "|Fortinet|",
+                "FortiGate",
                 "devname=",
                 "type=\"traffic\"",
                 "logid=",
@@ -119,6 +123,17 @@ impl LayaDecisionEngine {
                 "match",
                 "igb0",
                 "em0",
+            ],
+        );
+        vendor_token_priors.insert(
+            "kaggle_firewall".into(),
+            vec![
+                "%KAGGLE-FW-",
+                "firewall-kaggle",
+                "src_port=",
+                "dst_port=",
+                "nat_src_port=",
+                "sent_bytes=",
             ],
         );
         vendor_token_priors.insert(
